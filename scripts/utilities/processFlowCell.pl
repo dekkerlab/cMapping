@@ -19,7 +19,7 @@ sub check_options {
     
     my $ret={};
     
-    my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
+    my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
     
     if( defined($opts->{ flowCellDirectory }) ) {
         $flowCellDirectory = $opts->{ flowCellDirectory };
@@ -45,6 +45,14 @@ sub check_options {
     } else {
         print STDERR "\nERROR: Option genomeDirectory|gdir is required.\n";
         help();
+    }
+    
+    if( defined($opts->{ logDirectory }) ) {
+        $logDirectory = $opts->{ logDirectory };
+        $logDirectory =~ s/\/$//;
+        croak "logDirectory [".$logDirectory."] does not exist" if(!(-d $logDirectory));
+    } else {
+        $logDirectory=$outputDirectory."/cWorld-logs";
     }
     
     if( exists($opts->{ verbose }) ) {
@@ -125,6 +133,7 @@ sub check_options {
     $ret->{ flowCellDirectory }=$flowCellDirectory;
     $ret->{ outputDirectory }=$outputDirectory;
     $ret->{ genomeDirectory }=$genomeDirectory;
+    $ret->{ logDirectory }=$logDirectory;
     $ret->{ verbose }=$verbose;
     $ret->{ genomeName }=$genomeName;
     $ret->{ hicModeFlag }=$hicModeFlag;
@@ -137,7 +146,7 @@ sub check_options {
     $ret->{ snpModeFlag }=$snpModeFlag;
     $ret->{ debugModeFlag }=$debugModeFlag;
     
-    return($flowCellDirectory,$outputDirectory,$genomeDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
+    return($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
 }
 
 sub getAlignmentSoftware() {
@@ -386,6 +395,7 @@ sub help() {
     
     print STDERR "Options:\n";
     printf STDERR ("\t%-10s %-10s %-10s\n", "-v", "[]", "FLAG, verbose mode");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "--log", "[]", "log directory");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-h", "[]", "FLAG, hic flag ");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-f", "[]", "FLAG, 5C flag");
@@ -416,8 +426,8 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'flowCellDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|s=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d');
-my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag)=check_options( \%options );
+my $results = GetOptions( \%options,'flowCellDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|s=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d');
+my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag)=check_options( \%options );
 
 intro();
 
@@ -752,13 +762,13 @@ for(my $i=0;$i<$nLanes;$i++) {
     print "\t\t\t$emailTo\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"emailTo",$emailTo);
     
-    my $logDirectory="";
     print "\t\tlogDirectory [$logDirectory]: ";
     my $userLogDirectory = <STDIN>;
     chomp($userLogDirectory);
     $userLogDirectory =~ s/\/$//;
     $logDirectory=$userLogDirectory if(-d($userLogDirectory));
     print "\t\t\t$logDirectory\n";
+    system("mkdir -p $logDirectory") if(!(-d $logDirectory));
     croak "invalid log directory [$logDirectory]\n" if(!(-d($logDirectory)));
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"logDirectory",$logDirectory);
     
