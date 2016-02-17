@@ -227,8 +227,6 @@ open(OUTMESSAGE,">".$messageFile);
 print OUTMESSAGE $message;
 close(OUTMESSAGE);
 
-$team="my5C.help\@umassmed.edu";
-
 my $subject='c-World STARTING ('.$jobID.') '.$log{ jobName };
 
 `ssh ghpcc06 "php $data{ cMapping }/php/sendEmail.php '$team' '$cc' '$subject' '$messageFile'"`;
