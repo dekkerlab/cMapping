@@ -24,23 +24,15 @@ drawIterativePlots=$cMapping/R/Draw_CF_plots.R
 reduce=$cMapping/mapReduce/reduceHiC.sh
 
 #initialize isilon result folders
-ssh ghpcc06 "mkdir -p ${outputFolder}"
+mkdir -p ${outputFolder}
 
 # get name of files
 side1FileName=`basename "${side1File}"`
 side2FileName=`basename "${side2File}"`
 
 #handle the file copy
-if [[ ${workDirectory} =~ "farline/" ]]
-then
-	# re-route through ghpcc06 to access nearline/dekkerR
-	ssh ghpcc06 "cp ${side1File} ${jobDir}/."
-	ssh ghpcc06 "cp ${side2File} ${jobDir}/."
-else
-	# copy the files to scratch
-	cp ${side1File} ${jobDir}/.
-	cp ${side2File} ${jobDir}/.
-fi
+cp ${side1File} ${jobDir}/.
+cp ${side2File} ${jobDir}/.
 
 if [[ ${zippedFlag} = 1 ]]
 then
@@ -106,13 +98,13 @@ appendToConfigFile ${configFile} "qvEncoding" ${qvEncoding}
 ${reduce} ${configFile} ${LSB_JOBID} ${jobDir}
 
 # copy results back to output dir
-ssh ghpcc06 "cp ${jobDir}/${jobName}.tar.gz ${outputFolder}/."
-ssh ghpcc06 "cp ${jobDir}/${jobName}.validPair.txt.gz ${outputFolder}/."
-ssh ghpcc06 "cp ${jobDir}/${jobName}.validPair.itx.gz ${outputFolder}/."
-ssh ghpcc06 "cp ${configFile} ${outputFolder}/${jobName}.cfg"
+cp ${jobDir}/${jobName}.tar.gz ${outputFolder}/.
+cp ${jobDir}/${jobName}.validPair.txt.gz ${outputFolder}/.
+cp ${jobDir}/${jobName}.validPair.itx.gz ${outputFolder}/.
+cp ${configFile} ${outputFolder}/${jobName}.cfg
 
 if [ $keepSAM = 1 ]
 then
-	ssh ghpcc06 "cp ${jobDir}/${jobName}__side1.sam.gz ${outputFolder}/."
-	ssh ghpcc06 "cp ${jobDir}/${jobName}__side2.sam.gz ${outputFolder}/."
+	cp ${jobDir}/${jobName}__side1.sam.gz ${outputFolder}/.
+	cp ${jobDir}/${jobName}__side2.sam.gz ${outputFolder}/.
 fi

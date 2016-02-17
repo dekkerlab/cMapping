@@ -807,14 +807,14 @@ for(my $i=0;$i<$nLanes;$i++) {
     if(($hicModeFlag == 1) and ($fiveCModeFlag == 0)) { #HiC data
         print "\n";
         print "\t\tsubmitting HiC (reduceMem=$reduceMemoryNeededMegabyte:mapMem=$mapMemoryNeededMegabyte:tmp=$mapScratchSize)...\n";
-        my $return=`ssh ghpcc06 "source /etc/profile; bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J submitHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err $cMapping/utilities/submitHiC.sh $configFilePath"`;
+        my $return=`bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J submitHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err $cMapping/utilities/submitHiC.sh $configFilePath"`;
         chomp($return);
         print "\t\t$return\n";
         print "\n";
     } elsif(($hicModeFlag == 0) and ($fiveCModeFlag == 1)) { #5C data
         print "\n";
         print "\t\tsubmitting 5C (reduceMem=$reduceMemoryNeededMegabyte:mapMem=$mapMemoryNeededMegabyte:tmp=$mapScratchSize)...\n";
-        my $return=`ssh ghpcc06 "source /etc/profile; bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J submit5C -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err $cMapping/utilities/submit5C.sh $configFilePath"`;
+        my $return=`bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J submit5C -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err $cMapping/utilities/submit5C.sh $configFilePath"`;
         chomp($return);
         print "\t\t$return\n";
         print "\n";

@@ -31,7 +31,7 @@ checkForErrors() {
 			cat ${errorFile}
 			echo -e "----------\n"
 			
-			ssh ghpcc06 "source /etc/profile; bkill ${jobID}"
+			bkill ${jobID}
 			exit
 		fi
 	done
@@ -115,7 +115,7 @@ if [ $nSide1Chunks -ne $nSide2Chunks ]
 then
 	echo "ERROR - files are not of equal size $nSide1Chunks / $nSide2Chunks"
 	echo "exiting..."
-	ssh ghpcc06 "source /etc/profile; bkill ${jobID}"
+	bkill ${jobID}
 	exit
 else 
 	nChunks=$nSide1Chunks
