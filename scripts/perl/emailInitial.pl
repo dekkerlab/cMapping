@@ -159,7 +159,7 @@ my $message='
 		<tr>
 			<td>
 				<table class="emailTable" width=800>';
-				
+                
 my $lineNum=0;
 my %data=();
 open(HEADER,$jobName.".start.mappingLog.txt");	
@@ -213,23 +213,14 @@ open(OUT,">".$jobName.".start.mappingLog.html");
 print OUT $message;
 close(OUT);
 
-my ($team,$cc);
-$team = "my5C.help\@umassmed.edu";
-$cc="";
+my $team="";
+my $cc="";
 
 my $emailTo=$log{ emailTo };
-if($emailTo ne "none") {
-	my @tmpArr=split(/,/,$emailTo);
-	for(my $i=0;$i<@tmpArr;$i++) {
-		my $tmpEmail = $tmpArr[$i];
-		next if($tmpEmail eq "none");
-		next if($tmpEmail !~ /\@/);
-		
-		my ($name,$domain)=split(/\@/,$tmpEmail);
-		$tmpEmail = $name."@".$domain;
-		$team .= ",".$tmpEmail;
-	}
-}
+my $userEmail=$log{ userEmail };
+$team = "my5C.help\@umassmed.edu";
+$team .= ",".$emailTo if(($emailTo ne "") and ($emailTo ne "none"));
+$team .= ",".$userEmail if(($userEmail ne "") and ($userEmail ne "none"));
 
 my $messageFile=$jobName.".start.message.html";
 open(OUTMESSAGE,">".$messageFile);

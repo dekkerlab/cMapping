@@ -169,7 +169,7 @@ sub getUserEmail() {
     
     $user_email = "" if($user_email !~ /\@/);
     
-    print($user_email);
+    return($user_email);
 }
 
 sub getAlignmentSoftware() {
@@ -778,6 +778,13 @@ for(my $i=0;$i<$nLanes;$i++) {
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"intervalSizeMegabyte",$intervalSizeMegabyte);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"reduceMemoryNeededMegabyte",$reduceMemoryNeededMegabyte);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"mapMemoryNeededMegabyte",$mapMemoryNeededMegabyte);
+    
+    print "\t\tuserEmail (email address) [$userEmail]:\t";
+    my $userEmailChoice = <STDIN>;
+    chomp($userEmailChoice);
+    $userEmail = $userEmailChoice if(($userEmailChoice ne "") and ($userEmailChoice =~ /@/) and ($userEmailChoice =~ /\s+/));
+    print "\t\t\t$userEmail\n";
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"userEmail",$userEmail);
     
     print "\t\temailTo (email address) [none]:\t";
     my $emailTo = <STDIN>;
