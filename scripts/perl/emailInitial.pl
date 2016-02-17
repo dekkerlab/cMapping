@@ -6,37 +6,31 @@ use strict;
 use English;
 use POSIX qw(ceil floor);
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
+use Carp qw(carp cluck croak confess);
 
 sub check_options {
     my $opts = shift;
-    my ($jobID,$jobName,$quietMode,$configFile);
-	$jobID=$jobName=$quietMode=$configFile="";
+    my ($jobID,$jobName,$configFile);
  
 	if( exists($opts->{'jobID'}) ) {
 		$jobID = $opts->{'jobID'};
     } else {
-		die("emailInitial: jobID|j is required.\n");
+		croak "emailInitial: jobID|j is required.\n"
     }
 	
 	if( exists($opts->{ jobName }) ) {
 		$jobName = $opts->{ jobName };
 	} else {
-		die("emailInitial: jobName|jn is required.\n");		
-	}
-	
-	if( exists($opts->{'quietMode'}) ) {
-		$quietMode = $opts->{'quietMode'};
-    } else {
-		die("emailInitial: quietMode|q is required.\n");		
+		croak "emailInitial: jobName|jn is required.\n";
 	}
 	
 	if( exists($opts->{'configFile'}) ) {
 		$configFile = $opts->{'configFile'};
     } else {
-		die("emailInitial: configFile|cf is required.\n");
+		croak "emailInitial: configFile|cf is required.\n";
 	}
 	
-	return($jobID,$jobName,$quietMode,$configFile);
+	return($jobID,$jobName,$configFile);
 }
 
 
@@ -65,8 +59,8 @@ sub baseName($) {
 }	
 
 my %options;
-my $results = GetOptions( \%options,'jobID|j=s','jobName|jn=s','quietMode|q=s','configFile|cf=s');
-my ($jobID,$jobName,$quietMode,$configFile)=check_options( \%options );
+my $results = GetOptions( \%options,'jobID|j=s','jobName|jn=s','configFile|cf=s');
+my ($jobID,$jobName,$configFile)=check_options( \%options );
 
 my $time = getDate();
 
@@ -92,7 +86,6 @@ print OUT "time\t".$time."\n";
 print OUT "cType\t".$log{ cType }."\n";
 print OUT "logDirectory\t".$log{ logDirectory }."\n";
 print OUT "UUID\t".$log{ UUID }."\n";
-print OUT "codeTree\t".$log{ codeTree }."\n";
 print OUT "cMapping\t".$log{ cMapping }."\n";
 print OUT "computeResource\t".$log{ computeResource }."\n";
 print OUT "reduceResources\t".$log{ reduceQueue }." / ".$log{ reduceTimeNeeded }."\n";
@@ -222,6 +215,7 @@ close(OUT);
 
 my ($team,$cc);
 $team = "my5C.help\@umassmed.edu";
+$cc="";
 
 my $emailTo=$log{ emailTo };
 if($emailTo ne "none") {
@@ -242,12 +236,7 @@ open(OUTMESSAGE,">".$messageFile);
 print OUTMESSAGE $message;
 close(OUTMESSAGE);
 
-if($quietMode == 0) { #do not supress
-	$cc="bryan.lajoie\@umassmed.edu,job.dekker\@umassmed.edu";
-} else { #supress mail for debugging
-	$cc="bryan.lajoie\@umassmed.edu";
-	$team="my5C.help\@umassmed.edu";
-}
+$team="my5C.help\@umassmed.edu";
 
 my $subject='c-World STARTING ('.$jobID.') '.$log{ jobName };
 

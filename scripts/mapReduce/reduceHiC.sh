@@ -99,7 +99,7 @@ mkdir -p ${mapReduceDir}/error
 mkdir -p ${mapReduceDir}/plots
 
 # send initial email
-perl ${initialEmail} -j ${jobID} -jn ${mapReduceDir}/log/${jobName} -q ${quietModeFlag} -cf ${configFile}
+perl ${initialEmail} -j ${jobID} -jn ${mapReduceDir}/log/${jobName} -cf ${configFile}
 
 # split the input file into N chunks
 nSide1Chunks=`perl ${splitFile} -i ${jobDir}/${side1FileName} -s ${splitSize} -g 4 -o ${mapReduceDir}/chunks`
@@ -274,7 +274,7 @@ tar -czvf ${jobDir}/${jobName}.tar.gz -C ${mapReduceDir}/ log/ plots/ > /dev/nul
 cp ${jobDir}/${jobName}.tar.gz ${mapReduceDir}/plots/. 
 
 # send out email
-perl ${completionEmail} -j ${jobID} -jn ${mapReduceDir}/log/${jobName} -lf ${mapReduceDir}/log/${jobName}.end.mappingLog.txt -q ${quietModeFlag} -cf ${configFile} -pf ${mapReduceDir}/plots/
+perl ${completionEmail} -j ${jobID} -jn ${mapReduceDir}/log/${jobName} -lf ${mapReduceDir}/log/${jobName}.end.mappingLog.txt -cf ${configFile} -pf ${mapReduceDir}/plots/
 
 # copy results back to main project dir
 cp ${mapReduceDir}/validPairs/${jobName}.validPair.txt.gz ${jobDir}/.

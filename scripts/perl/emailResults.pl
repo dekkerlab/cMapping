@@ -6,41 +6,35 @@ use strict;
 use English;
 use POSIX qw(ceil floor);
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
+use Carp qw(carp cluck croak confess);
 
 sub check_options {
 	my $opts = shift;
 
-	my ($jobID,$jobName,$logFile,$quietMode,$configFile,$plotFolder);
-	$jobID=$jobName=$logFile=$quietMode=$configFile=$plotFolder="";
+	my ($jobID,$jobName,$logFile,$configFile,$plotFolder);
 	
 	if( exists($opts->{'jobID'}) ) {
 		$jobID = $opts->{'jobID'};
 	} else {
-		die("emailInitial: jobID|j is required.\n");
+		croak "emailInitial: jobID|j is required.\n";
 	}
 	
 	if( exists($opts->{ jobName }) ) {
 		$jobName = $opts->{ jobName };
 	} else {
-		die("emailInitial: jobName|jn is required.\n");		
+		croak "emailInitial: jobName|jn is required.\n"
 	}
 	
 	if( $opts->{'logFile'} ) {
 		$logFile = $opts->{'logFile'};
 	} else {
-		die("emailResults: logFile|lf is required.");
-	}
-	
-	if( exists($opts->{'quietMode'}) ) {
-		$quietMode = $opts->{'quietMode'};
-	} else {
-		die("emailResults: quietMode|q is required.");
+		croak "emailResults: logFile|lf is required.";
 	}
 	
 	if( exists($opts->{'configFile'}) ) {
 		$configFile = $opts->{'configFile'};
 	} else {
-		die("emailInitial: configFile|cf is required.\n");
+		croak "emailInitial: configFile|cf is required.\n";
 	}
 	
 	
@@ -50,7 +44,7 @@ sub check_options {
 		$plotFolder = "";
 	}
 	
-	return($jobID,$jobName,$logFile,$quietMode,$configFile,$plotFolder);	
+	return($jobID,$jobName,$logFile,$configFile,$plotFolder);	
 }
 
 sub commify {
@@ -78,8 +72,8 @@ sub baseName($) {
 }	
 
 my %options;
-&GetOptions( \%options,'jobID|j=s','jobName|jn=s','logFile|lf=s','quietMode|q=s','configFile|cf=s','plotFolder|pf=s');
-my ($jobID,$jobName,$logFile,$quietMode,$configFile,$plotFolder) = &check_options( \%options );
+&GetOptions( \%options,'jobID|j=s','jobName|jn=s','logFile|lf=s','configFile|cf=s','plotFolder|pf=s');
+my ($jobID,$jobName,$logFile,$configFile,$plotFolder) = &check_options( \%options );
 
 my $time = getDate();
 
@@ -97,6 +91,7 @@ while(my $line = <IN>) {
 	$log{$field}=$value;
 }
 close(IN);
+
 
 my $message='
 <html>
@@ -120,14 +115,14 @@ my $message='
 		<tr>
 			<td>
 				<div class="pageTitle">c-World (<a href="http://c-world.umassmed.edu">http://c-world.umassmed.edu</a>)</div>
-				<div class="subTitle">Completed c-World/cMapping pipeline job #'.$jobID.'</div>
+				<div class="subTitle">Starting c-World/cMapping pipeline job #'.$jobID.'</div>
 				<div class="subTitle">('.$time.')</div>
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<table class="emailTable" width=800>';
-
+                
 my $lineNum=0;
 my %data=();
 open(HEADER,$logFile);
@@ -183,6 +178,7 @@ close(OUT);
 
 my ($team,$cc);
 $team = "my5C.help\@umassmed.edu";
+$cc="";
 
 my $emailTo=$log{ emailTo };
 if($emailTo ne "none") {
@@ -198,12 +194,7 @@ if($emailTo ne "none") {
 	}
 }
 
-if($quietMode == 0) { #suppress emails
-	$cc="bryan.lajoie\@umassmed.edu,job.dekker\@umassmed.edu";
-} else { #do not suppress emails
-	$cc="bryan.lajoie\@umassmed.edu";
-	$team="my5C.help\@umassmed.edu";
-}
+$team="my5C.help\@umassmed.edu";
 
 my $attachmentString="";
 $plotFolder = $plotFolder."/" if($plotFolder !~ /\/$/); # tack on trailing / if not there	
