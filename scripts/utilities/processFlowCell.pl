@@ -19,7 +19,7 @@ sub check_options {
     
     my $ret={};
     
-    my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
+    my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
     
     if( defined($opts->{ flowCellDirectory }) ) {
         $flowCellDirectory = $opts->{ flowCellDirectory };
@@ -53,6 +53,12 @@ sub check_options {
         croak "logDirectory [".$logDirectory."] does not exist" if(!(-d $logDirectory));
     } else {
         $logDirectory=$outputDirectory."/cWorld-logs";
+    }
+    
+    if( defined($opts->{ userEmail }) ) {
+        $userEmail = $opts->{ userEmail };
+    } else {
+        $userEmail=&getUserEmail();
     }
     
     if( exists($opts->{ verbose }) ) {
@@ -134,6 +140,7 @@ sub check_options {
     $ret->{ outputDirectory }=$outputDirectory;
     $ret->{ genomeDirectory }=$genomeDirectory;
     $ret->{ logDirectory }=$logDirectory;
+    $ret->{ userEmail }=$userEmail;
     $ret->{ verbose }=$verbose;
     $ret->{ genomeName }=$genomeName;
     $ret->{ hicModeFlag }=$hicModeFlag;
@@ -146,7 +153,23 @@ sub check_options {
     $ret->{ snpModeFlag }=$snpModeFlag;
     $ret->{ debugModeFlag }=$debugModeFlag;
     
-    return($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
+    return($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
+}
+
+sub getUserEmail() {
+    
+    # hb67w:x:10839:1081:Houda Belaghzal [Houda.belaghzal@umassmed.edu]:/home/hb67w:/bin/bash
+    my $user_info=`grep \$USER /etc/passwd`;
+    chomp($user_info);
+    
+    my @tmp=split(/:/,$user_info);
+    my $user_email=$tmp[4];
+    $user_email=(split(/\[/,$user_email))[1];
+    $user_email =~ s/\]//;
+    
+    $user_email = "" if($user_email !~ /\@/);
+    
+    print($user_email);
 }
 
 sub getAlignmentSoftware() {
@@ -396,6 +419,7 @@ sub help() {
     print STDERR "Options:\n";
     printf STDERR ("\t%-10s %-10s %-10s\n", "-v", "[]", "FLAG, verbose mode");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--log", "[]", "log directory");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "--email", "[]", "user email address");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-h", "[]", "FLAG, hic flag ");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-f", "[]", "FLAG, 5C flag");
@@ -426,8 +450,8 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'flowCellDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|s=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d');
-my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag)=check_options( \%options );
+my $results = GetOptions( \%options,'flowCellDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|s=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d');
+my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag)=check_options( \%options );
 
 intro();
 
@@ -818,14 +842,14 @@ for(my $i=0;$i<$nLanes;$i++) {
     if(($hicModeFlag == 1) and ($fiveCModeFlag == 0)) { #HiC data
         print "\n";
         print "\t\tsubmitting HiC (reduceMem=$reduceMemoryNeededMegabyte:mapMem=$mapMemoryNeededMegabyte:tmp=$mapScratchSize)...\n";
-        my $return=`bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J submitHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err $cMapping/utilities/submitHiC.sh $configFilePath`;
+        my $return=`bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u $userEmail -J submitHiC -o $userHomeDirectory/lsf_jobs/LSB_%J.log -e $userHomeDirectory/lsf_jobs/LSB_%J.err $cMapping/utilities/submitHiC.sh $configFilePath`;
         chomp($return);
         print "\t\t$return\n";
         print "\n";
     } elsif(($hicModeFlag == 0) and ($fiveCModeFlag == 1)) { #5C data
         print "\n";
         print "\t\tsubmitting 5C (reduceMem=$reduceMemoryNeededMegabyte:mapMem=$mapMemoryNeededMegabyte:tmp=$mapScratchSize)...\n";
-        my $return=`bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J submit5C -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err $cMapping/utilities/submit5C.sh $configFilePath`;
+        my $return=`bsub -n 2 -q $reduceQueue -R span[hosts=1] -R rusage[mem=$reduceMemoryNeededMegabyte:tmp=$reduceScratchSize] -W $reduceTimeNeeded -N -u $userEmail -J submit5C -o $userHomeDirectory/lsf_jobs/LSB_%J.log -e $userHomeDirectory/lsf_jobs/LSB_%J.err $cMapping/utilities/submit5C.sh $configFilePath`;
         chomp($return);
         print "\t\t$return\n";
         print "\n";
