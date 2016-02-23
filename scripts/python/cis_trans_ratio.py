@@ -105,11 +105,11 @@ def main():
     
     cistrans_bedGraphFile=infile_name+".cistransratio.bedGraph"
     cistrans_fh=open(cistrans_bedGraphFile,"w")
-    print("track type=bedGraph name='"+infile_name+"__cistrans' description='cis trans ratio [log2(cis/trans]' visibility=full autoScale=on color=0,0,0 altColor=100,100,100",end="\n",file=cistrans_fh)
+    print("track type=bedGraph name='"+infile_name+"__cistrans' description='cis trans [cis_pc]' visibility=full maxHeightPixels=128:32:32 visibility=full autoScale=off viewLimits=0:100 color=0,0,0 altColor=100,100,100",end="\n",file=cistrans_fh)
     
     visibility_bedGraphFile=infile_name+".visibility.bedGraph"    
     visibility_fh=open(visibility_bedGraphFile,"w")
-    print("track type=bedGraph name='"+infile_name+"__visibility' description='bin visibility' visibility=full autoScale=on color=0,0,0 altColor=100,100,100",end="\n",file=visibility_fh)
+    print("track type=bedGraph name='"+infile_name+"__visibility' description='bin visibility' visibility=full maxHeightPixels=128:32:32 visibility=full autoScale=on color=0,0,0 altColor=100,100,100",end="\n",file=visibility_fh)
 
     k=0
     for c in rel_chrs:
@@ -136,9 +136,9 @@ def main():
                 trans_sum=np.nansum(current_block[j,trans_mask])
                 all_sum=np.nansum(current_block[j,:])
                 
-                cis_trans_ratio=np.nan
+                cis_pc=np.nan
                 if(np.all([cis_sum,trans_sum])):
-                    cis_trans_ratio=math.log((cis_sum/trans_sum),2)
+                    cis_pc=((cis_sum/(cis_sum+trans_sum))*100)
                                     
                 chr_id=deGroupChr(chrs[bin_positions[k][0]])
                 bin_start=bin_positions[k][1]
@@ -151,8 +151,8 @@ def main():
                 sys.stdout.write("\t"+str(k)+" / "+str((np.count_nonzero(bin_mask)-1)-1)+" ["+str("{0:.2f}".format(pc))+"%] complete")
                 sys.stdout.flush()
                 
-                if(~np.isnan(cis_trans_ratio)):
-                    print(str(chr_id)+"\t"+str(bin_start)+"\t"+str(bin_end)+"\t"+str("{0:.{1}f}".format(cis_trans_ratio,precision)),end="\n",file=cistrans_fh)
+                if(~np.isnan(cis_pc)):
+                    print(str(chr_id)+"\t"+str(bin_start)+"\t"+str(bin_end)+"\t"+str("{0:.{1}f}".format(cis_pc,precision)),end="\n",file=cistrans_fh)
                 
                 if(~np.isnan(all_sum)):
                     print(str(chr_id)+"\t"+str(bin_start)+"\t"+str(bin_end)+"\t"+str("{0:.{1}f}".format(all_sum,precision)),end="\n",file=visibility_fh)
@@ -190,9 +190,32 @@ def deGroupHeader(header,extractBy="liteChr",index=getSmallUniqueString()):
     
     return(header)
     
-def getOverlap(a, b):
-    return max(0, min(a[1], b[1]) - max(a[0], b[0]))
-
+def flip_intervals(a,b):
+    """flip intervals, to ensure a < b
+    """
+    
+    return(b,a)
+    
+def is_overlap(a, b):
+    """test to for overlap between two intervals.
+    """
+    
+    if(a[0] > a[1]):
+        sys.exit('\nerror: incorrectly formated interval! start '+str(a[0])+' > end '+str(a[1])+'!\n\t'+str(a)+' '+str(b)+'\n')
+    if(b[0] > b[1]):
+        sys.exit('\nerror: incorrectly formated interval! start '+str(b[0])+' > end '+str(b[1])+'!\n\t'+str(a)+' '+str(b)+'\n')
+    
+    if a[0] < b[0] and a[1] > b[1]:
+        return((b[1]-b[0])+1)
+    
+    if b[0] < a[0] and b[1] > a[1]:   
+        return((a[1]-a[0])+1)
+        
+    if b[0] < a[0]:
+        a,b=flip_intervals(a,b)
+           
+    return max(0, ( min(a[1],b[1]) - max(a[0],b[0]) ) ) 
+    
 if __name__=="__main__":
     main()
 
