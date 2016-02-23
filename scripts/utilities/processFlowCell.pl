@@ -58,7 +58,7 @@ sub check_options {
     if( defined($opts->{ userEmail }) ) {
         $userEmail = $opts->{ userEmail };
     } else {
-        $userEmail=&getUserEmail();
+        $userEmail=getUserEmail();
     }
     
     if( exists($opts->{ verbose }) ) {
@@ -156,22 +156,6 @@ sub check_options {
     return($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
 }
 
-sub getUserEmail() {
-    
-    # hb67w:x:10839:1081:Houda Belaghzal [Houda.belaghzal@umassmed.edu]:/home/hb67w:/bin/bash
-    my $user_info=`grep \$USER /etc/passwd`;
-    chomp($user_info);
-    
-    my @tmp=split(/:/,$user_info);
-    my $user_email=$tmp[4];
-    $user_email=(split(/\[/,$user_email))[1];
-    $user_email =~ s/\]//;
-    
-    $user_email = "" if($user_email !~ /\@/);
-    
-    return($user_email);
-}
-
 sub getAlignmentSoftware() {
     
     my $userHomeDirectory = getUserHomeDirectory();
@@ -186,7 +170,7 @@ sub getAlignmentSoftware() {
     
     $ret=`which novoalign 2> /dev/null`;
     chomp($ret);
-    $alignmentSoftware{ novoCraft }=$ret;
+    $alignmentSoftware{ novoalign }=$ret;
     
     return(\%alignmentSoftware);
 }
@@ -397,7 +381,7 @@ sub intro() {
     
     print STDERR "Tool:\t\t".$tool."\n";
     print STDERR "Version:\t".$version."\n";
-    print STDERR "Summary:\tcMapping pipeline\n";
+    print STDERR "Summary:\tcMapping pipeline - stage 1\n";
     
     print STDERR "\n";
 }
@@ -405,7 +389,7 @@ sub intro() {
 sub help() {
     intro();
     
-    print STDERR "Usage: perl processFlowCell.pl [OPTIONS] -i <inputFlowCellDirectory> -o <outputDirectory>\n";
+    print STDERR "Usage: perl processFlowCell.pl [OPTIONS] -i <inputFlowCellDirectory> -o <outputDirectory> --gdir <genomeDirectory>\n";
     
     print STDERR "\n";
     
@@ -432,7 +416,7 @@ sub help() {
     
     print STDERR "Notes:";
     print STDERR "
-    This script starts the cMapping pipeline, for processing 5C/Hi-C data [UMMS specific].\n";
+    Stage 1 of the cMapping pipeline, for processing 5C/Hi-C data [UMMS specific].\n";
     
     print STDERR "\n";
     
@@ -577,13 +561,13 @@ for(my $i=0;$i<$nLanes;$i++) {
     # alignment software choice
     my $aligner="bowtie2";    
     if(($hicModeFlag == 1) and ($snpModeFlag == 0) ) {
-        print "\t\taligner (bowtie2,novoCraft) [$aligner]: ";
+        print "\t\taligner (bowtie2,novoalign) [$aligner]: ";
         my $userAligner = <STDIN>;
         chomp($userAligner);
-        die("invalid aligner ($userAligner)!") if(($userAligner ne "") and (($userAligner ne "bowtie2") and ($userAligner ne "novoCraft")));
+        die("invalid aligner ($userAligner)!") if(($userAligner ne "") and (($userAligner ne "bowtie2") and ($userAligner ne "novoalign")));
         $aligner = $userAligner if($userAligner ne "");
     } else {  # SNP mode or 5C mode
-        $aligner="novoCraft";
+        $aligner="novoalign";
     }
     print "\t\t\t$aligner\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"aligner",$aligner);
@@ -603,7 +587,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     # alignment options choice
     my $alignmentOptions="";
     $alignmentOptions="--very-sensitive --no-hd --no-sq --mm --qc-filter" if($aligner eq "bowtie2");
-    $alignmentOptions=" -r all 5 -R 30 -q 2" if(($aligner eq "novoCraft") and ($snpModeFlag == 1));
+    $alignmentOptions=" -r all 5 -R 30 -q 2" if(($aligner eq "novoalign") and ($snpModeFlag == 1));
     print "\t\talignmentOptions [$alignmentOptions]: ";
     my $userAlignmentOptions = <STDIN>;
     chomp($userAlignmentOptions);
@@ -630,7 +614,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"optionalSide2AlignmentOptions",$optionalSide2AlignmentOptions);
     
     my $minimumReadDistance=5;
-    if(($aligner eq "novoCraft") and ($snpModeFlag == 1)) {
+    if(($aligner eq "novoalign") and ($snpModeFlag == 1)) {
         print "\t\tminimumReadDistance [5] : ";
         my $userMinimumReadDistance = <STDIN>;
         chomp($userMinimumReadDistance);
@@ -740,8 +724,8 @@ for(my $i=0;$i<$nLanes;$i++) {
     }
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"restrictionFragmentPath",$restrictionFragmentPath);
     
-    my $genomePath=$userHomeDirectory."/genome/$aligner/$genomeName";
-    my $genomeDir=$userHomeDirectory."/genome/$aligner/$genomeName";
+    my $genomePath=$genomeDirectory."/".$aligner."/".$genomeName;
+    my $genomeDir=$genomeDirectory."/".$aligner."/".$genomeName;
     if(($hicModeFlag == 1) and ($fiveCModeFlag == 0)) {
         $genomePath .= "/".$genomeName;
         die("invalid genome path! (".$genomePath."*)\n") if( (!(glob($genomePath))) and (!(glob($genomePath."*"))) );
@@ -825,18 +809,18 @@ for(my $i=0;$i<$nLanes;$i++) {
     $mapTimeNeeded=((0.0003*$splitSize)+57)+720 if($snpModeFlag == 1);
     # this linear approximation is done using mm9 - bowtie (excel)
     
+    $shortMode = 1 if($debugModeFlag);
     my $genomeSizeFactor=max(1,($indexSizeMegabyte/3000));
     $genomeSizeFactor = log($genomeSizeFactor) if($genomeSizeFactor > 1);
     $mapTimeNeeded *= $genomeSizeFactor;
     $mapTimeNeeded *= 2 if($iterativeMappingFlag == 1);
-    $mapTimeNeeded = 240 if($mapTimeNeeded < 240);
-    $mapTimeNeeded = 240 if($shortMode == 1);
-    my $mapTimeNeededHour = floor($mapTimeNeeded/60);
+    $mapTimeNeeded = 120 if($shortMode == 1);
+    
+    my $mapTimeNeededHour = max(2,floor($mapTimeNeeded/60));
     $mapTimeNeededHour = sprintf("%02d", $mapTimeNeededHour);
     my $mapTimeNeededMinute = ($mapTimeNeeded%60);
     $mapTimeNeededMinute = sprintf("%02d", $mapTimeNeededMinute);
-    my $mapQueue="short";
-    $mapQueue="long" if($mapTimeNeeded > 240);
+    my $mapQueue="long";
     $mapQueue="short" if($shortMode == 1);
     $mapTimeNeeded=$mapTimeNeededHour.":".$mapTimeNeededMinute;
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"mapTimeNeeded",$mapTimeNeeded);

@@ -90,7 +90,7 @@ do
 			echo "${alignmentSoftwarePath} --${qvEncoding} ${alignmentOptions} ${optionalSide1AlignmentOptions} -x ${genomePath} -U ${side1Reads} ${bowtieIterativeMappingOptions} -S ${side1Sam} > ${side1Sam}.alignerLog 2>&1" >> ${mapJob}
 			# side2
 			echo "${alignmentSoftwarePath} --${qvEncoding} ${alignmentOptions} ${optionalSide2AlignmentOptions} -x ${genomePath} -U ${side2Reads} ${bowtieIterativeMappingOptions} -S ${side2Sam} > ${side2Sam}.alignerLog 2>&1" >> ${mapJob}
-		elif [[ ${aligner} = "novoCraft" ]]
+		elif [[ ${aligner} = "novoalign" ]]
 		then
 			# novoalign cannot (yet) handle gzipped files - decompress them
 			# side1

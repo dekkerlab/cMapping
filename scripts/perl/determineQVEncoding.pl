@@ -94,7 +94,7 @@ my $l;
 my $number;
  
 my $phred="phred33";
-$phred="STDFQ" if($aligner eq "novoCraft");
+$phred="STDFQ" if($aligner eq "novoalign");
 
 exit if(!(-e($inputFile)));
 
@@ -115,14 +115,14 @@ while(my $line = <FQ>) {
 			if($number > 74) { # if solexa/illumina
 				# phred64 - but keep checking to be sure
 				$phred="phred64";
-				$phred="ILMFQ" if($aligner eq "novoCraft");
+				$phred="ILMFQ" if($aligner eq "novoalign");
 				print $phred;
 				close(FQ);
 				
 				exit;
 			} elsif($number < 59) { # if sanger
 				$phred="phred33";
-				$phred="STDFQ" if($aligner eq "novoCraft");
+				$phred="STDFQ" if($aligner eq "novoalign");
 				print $phred;
 				close(FQ);
 				

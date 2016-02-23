@@ -95,7 +95,6 @@ print OUT "# combine5C\n";
 print OUT "# time\t".$time."\n";
 print OUT "# logDirectory\t".$log{ logDirectory }."\n";
 print OUT "# UUID\t".$log{ UUID }."\n";
-print OUT "# codeTree\t".$log{ codeTree }."\n";
 print OUT "# cMapping\t".$log{ cMapping }."\n";
 print OUT "# computeResource\t".$log{ computeResource }."\n";
 print OUT "# combineQueue\t".$log{ combineQueue }."\n";

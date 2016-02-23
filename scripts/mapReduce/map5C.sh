@@ -41,7 +41,7 @@ do
 	side2NovoOutputFile=${jobDir}/${side2ChunkFileName}.novoOutput
 	echo "cp ${side2chunkFile} ${side2fastqFile}" >> ${mapJob}
 	
-	if [[ ${aligner} = "novoCraft" ]]
+	if [[ ${aligner} = "novoalign" ]]
 	then
 		# novoalign cannot (yet) handle gzipped files - decompress them
 		# side1

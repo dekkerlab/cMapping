@@ -11,8 +11,8 @@ checkForErrors() {
 		cp ${jobDir}/*.log ${parentJobDir}/. 2>> ${errorFile}
 		cp ${jobDir}/*.error ${parentJobDir}/. 2>> ${errorFile}
 		
-		ssh ghpcc06 "source /etc/profile; bkill ${jobID}"
-		ssh ghpcc06 "source /etc/profile; bkill ${wrapperJobID}"
+		bkill ${jobID}
+		bkill ${wrapperJobID}
 		exit
 	fi
 	

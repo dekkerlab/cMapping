@@ -13,7 +13,7 @@ configFile=${1}
 source ${configFile}
 
 # set up perl/python/shell paths
-combineHiC=${cMapping}/scripts/combineHiC.sh
+combineHiC=${cMapping}/utilities/combineHiC.sh
 createHiCLogFile=${cMapping}/perl/createHiCLogFile.pl
 collapseHiCValidPair=${cMapping}/perl/collapseHiCValidPairs.pl
 splitIntervalFile=${cMapping}/perl/splitIntervalFile.pl
@@ -40,22 +40,14 @@ for (( i = 0 ; i < ${#array[@]} ; i++ ))
 do
 	validPairFile=${array[$i]}
 	validPairFileName=`basename $validPairFile`
-
-	if [[ ${validPairFile} =~ "dekkerR/" ]] || [[ ${validPairFile} =~ "farline/" ]] || [[ ${validPairFile} =~ "isilon/" ]]
-	then
-		ssh ghpcc06 "cp ${validPairFile} ${jobDir}/validPairs/."
-	else
-		cp ${validPairFile} ${jobDir}/validPairs/.
-	fi
-	
-	
+	cp ${validPairFile} ${jobDir}/validPairs/.
 done
 
 # merge sort all files together.
 nValidPairFiles=`ls -l ${jobDir}/validPairs/*.validPair.txt.gz | wc -l`
 if [ ${nValidPairFiles} -gt 1 ]
 then
-	# now merge sort all valid pair files
+	# now merge sort all valid pair files 
 	cmd="sort -m -k6,6n -k12,12n -k3,3n -k9,9n "
 	for input in ${jobDir}/validPairs/*.validPair.txt.gz;
 	do
@@ -136,8 +128,8 @@ then
 				sub_mapID=`uuidgen | rev | cut -d '-' -f 1`
 				chr_mapID=${mapID}__${sub_mapID}
 				
-				#echo "bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/scripts/garbageCollectTmp.sh ${UUID} ${chr_mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${intervalFile} ${chr_mapID}"
-				bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/scripts/garbageCollectTmp.sh ${UUID} ${chr_mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${intervalFile} ${chr_mapID}
+				#echo "bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${chr_mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${intervalFile} ${chr_mapID}"
+				bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${chr_mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${intervalFile} ${chr_mapID}
 				results[${nResults}]=${jobName}__${group}__${binLabel}-${binSize}.complete
 				let nResults++
 			done
@@ -145,7 +137,7 @@ then
 			group="genome"
 			cp ${restrictionFragmentPath} ${jobDir}/map__${mapID}/${jobName}__${group}.txt
 			intervalFile=${jobDir}/map__${mapID}/${jobName}__${group}.txt
-			bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/scripts/garbageCollectTmp.sh ${UUID} ${mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${restrictionFragmentPath} ${mapID}
+			bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${restrictionFragmentPath} ${mapID}
 			results[${nResults}]=${jobName}__${group}__${binLabel}-${binSize}.complete
 			let nResults++
 		fi

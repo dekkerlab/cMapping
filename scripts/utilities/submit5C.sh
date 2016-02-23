@@ -23,23 +23,15 @@ determineQVEncoding=$cMapping/perl/determineQVEncoding.pl
 reduce=$cMapping/mapReduce/reduce5C.sh
 
 #initialize isilon result folders
-ssh ghpcc06 "mkdir -p ${outputFolder}"
+mkdir -p ${outputFolder}
 
 # get name of files
 side1FileName=`basename "${side1File}"`
 side2FileName=`basename "${side2File}"`
 
 #handle the file copy
-if [[ ${workDirectory} =~ "farline/" ]]
-then
-	# re-route through ghpcc06 to access nearline/dekkerR
-	ssh ghpcc06 "cp ${HOME}/${side1File} ${jobDir}/."
-	ssh ghpcc06 "cp ${HOME}/${side2File} ${jobDir}/."
-else
-	# copy the files to scratch
-	cp ${HOME}/${side1File} ${jobDir}/.
-	cp ${HOME}/${side2File} ${jobDir}/.
-fi
+cp ${side1File} ${jobDir}/.
+cp ${side2File} ${jobDir}/.
 
 if [[ ${zippedFlag} = 1 ]]
 then
