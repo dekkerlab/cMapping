@@ -433,7 +433,7 @@ sub help() {
     print STDERR "\n";
     
     print STDERR "Required:\n";
-    printf STDERR ("\t%-10s %-10s %-10s\n", "-i", "[]", "flow cell directory (path)");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "-i", "[]", "cData directory(path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-o", "[]", "output directory (path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--gdir", "[]", "genome directory (fasta,index,restrictionSite)");
     
@@ -677,7 +677,9 @@ foreach my $sampleName ( keys %$laneData ) {
     chomp($userLogDirectory);
     $userLogDirectory =~ s/\/$//;
     $logDirectory=$userLogDirectory if(-d($userLogDirectory));
-    print "\t\t$logDirectory\n";
+    print "\t\t\t$logDirectory\n";
+    system("mkdir -p $logDirectory") if(!(-d $logDirectory));
+    croak "invalid log directory [$logDirectory]\n" if(!(-d($logDirectory)));
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"logDirectory",$logDirectory);
     
     my $UUID=getUniqueString();
