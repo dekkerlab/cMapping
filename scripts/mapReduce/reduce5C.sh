@@ -172,8 +172,5 @@ perl ${completionEmail} -j ${jobID} -jn ${mapReduceDir}/log/${jobName} -lf ${map
 cp ${mapReduceDir}/validPairs/${jobName}.validPair.itx.gz ${jobDir}/.
 cp ${mapReduceDir}/validPairs/${jobName}.validPair.txt.gz ${jobDir}/.
 
-# purge any/all loaded modules
-module purge
-
 # do clean up
 if [ $debugModeFlag = 0 ]; then rm -rf ${mapReduceDir}/; fi

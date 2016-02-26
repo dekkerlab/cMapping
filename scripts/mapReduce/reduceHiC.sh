@@ -286,8 +286,5 @@ then
 	cp ${mapReduceDir}/sam/${jobName}__side2.sam.gz ${jobDir}/.
 fi
 
-# purge any/all loaded modules
-module purge
-
 # do clean up
 if [ $debugModeFlag = 0 ]; then rm -rf ${mapReduceDir}/; fi
