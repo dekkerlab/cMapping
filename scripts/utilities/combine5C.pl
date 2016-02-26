@@ -418,11 +418,13 @@ my $reduceScratchDir=$userHomeDirectory."/scratch";
 my $mapScratchDir="/tmp";
 $mapScratchDir=$userHomeDirectory."/scratch" if($debugModeFlag == 1);
 
+$shortMode=1 if($debugModeFlag == 1);
+
 # setup queue/timelimit for LSF
 my $combineQueue="long";
-$combineQueue="short" if($debugModeFlag == 1);
-my $combineTimeNeeded="96:00";
-$combineTimeNeeded="04:00" if($debugModeFlag == 1);
+$combineQueue="short" if($shortMode == 1);
+my $combineTimeNeeded="36:00";
+$combineTimeNeeded="04:00" if($shortMode == 1);
 my $combineMemoryNeeded=4096;
 $configFileVariables=logConfigVariable($configFileVariables,"combineQueue",$combineQueue);
 $configFileVariables=logConfigVariable($configFileVariables,"combineTimeNeeded",$combineTimeNeeded);

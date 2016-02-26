@@ -23,6 +23,7 @@ sub check_options {
     
      if( defined($opts->{ cDataDirectory }) ) {
         $cDataDirectory = $opts->{ cDataDirectory };
+        $cDataDirectory =~ s/\/$//;
         croak "cDataDirectory [".$cDataDirectory."] does not exist" if(!(-d $cDataDirectory));
     } else {
         print STDERR "\nERROR: Option inputCDataDirectory|i is required.\n";
