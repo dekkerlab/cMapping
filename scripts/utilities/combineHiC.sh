@@ -38,8 +38,8 @@ bin=${cMapping}/python/bin.py
 fragment=${cMapping}/python/fragment.py
 filter_1d_bins=${cMapping}/python/filter_1d_bins.py
 bin2hdf=${cMapping}/python/bin2hdf.py
-hdf2tab=${cMapping}/python/hdf2tab.py
-balance=${cMapping}/python/balance.py
+hdf2tab=${hdf2tab_path}
+balance=${balance_path}
 applyNANFilter=${cMapping}/python/applyNANFilter.py
 
 # set up job/task ID variables
@@ -95,7 +95,7 @@ python ${bin2hdf} -in ${binFile} -out ${hdfFile} -g ${genomeName} -in_bp ${binPo
 checkForErrors
 
 # extract RAW matrix from the filtered HDF5 (allxall)
-python ${hdf2tab} -i ${hdfFile} -o ${matrixFile} --maxdim ${maxdim} 1>> ${logFile} 2>> ${errorFile}
+python ${hdf2tab} -i ${hdfFile} -o ${matrixFile} -wm all__cis --maxdim ${maxdim} 1>> ${logFile} 2>> ${errorFile}
 
 checkForErrors
 
@@ -115,7 +115,7 @@ python ${balance} -in ${hdfFile} -out ${balancedHdfFile} -f ${factorFile} ${igno
 checkForErrors
 
 # extract BALANCED matrix from HDF5 (allxall)
-python ${hdf2tab} -i ${balancedHdfFile} -o ${balancedMatrixFile} --maxdim ${maxdim} 1>> ${logFile} 2>> ${errorFile}
+python ${hdf2tab} -i ${balancedHdfFile} -o ${balancedMatrixFile} -wm all__cis --maxdim ${maxdim} 1>> ${logFile} 2>> /dev/null
 
 checkForErrors
 

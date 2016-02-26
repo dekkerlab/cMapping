@@ -394,8 +394,10 @@ intro();
 my $cwd = getcwd();
 my $fullScriptPath=abs_path($0);
 my @fullScriptPathArr=split(/\//,$fullScriptPath);
-@fullScriptPathArr=@fullScriptPathArr[0..@fullScriptPathArr-3];
-my $scriptPath=join("/",@fullScriptPathArr);
+my @scriptDir=@fullScriptPathArr[0..@fullScriptPathArr-3];
+my $scriptPath=join("/",@scriptDir);
+my @gitDir=@fullScriptPathArr[0..@fullScriptPathArr-5];
+my $gitPath=join("/",@gitDir);
 
 my $configFileVariables={};
 my $userHomeDirectory = getUserHomeDirectory();
@@ -405,6 +407,7 @@ my $cMapping = $scriptPath;
 $configFileVariables=logConfigVariable($configFileVariables,"cDataDirectoryectory",$cDataDirectory);
 $configFileVariables=logConfigVariable($configFileVariables,"genomeName",$genomeName);
 $configFileVariables=logConfigVariable($configFileVariables,"cMapping",$cMapping);
+$configFileVariables=logConfigVariable($configFileVariables,"gitDir",$gitPath);
 $configFileVariables=logConfigVariable($configFileVariables,"debugModeFlag",$debugModeFlag);
 
 my $computeResource = getComputeResource();

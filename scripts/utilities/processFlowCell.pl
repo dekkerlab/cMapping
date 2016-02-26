@@ -12,7 +12,7 @@ use Cwd;
 use cworld::dekker;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.0";
+my $version = "1.0.1";
 
 sub check_options {
     my $opts = shift;
@@ -105,12 +105,7 @@ sub check_options {
     
     if( defined($opts->{ splitSize }) ) {
         $splitSize = $opts->{ splitSize };
-        if($splitSize < 1000000) {
-            print "WARNING - using a very small split size (debug) continue? [y,n]: ";
-            my $answer=<STDIN>;
-            chomp($answer);
-            die("exiting") if($answer ne "y");
-        }
+        confess "split size is too small - exiting" if($splitSize < 500000);
     } else {
         $splitSize=4000000;
     }
@@ -186,9 +181,9 @@ sub getGenomePath($$$$) {
     my $indexDirectory=$genomeDirectory."/".$aligner."/".$genomeName;
     my $restrictionFragmentFile=$genomeDirectory."/restrictionFragments/".$genomeName."/".$genomeName."__".$restrictionSite.".txt";
     
-    die("invalid genome directory ($indexDirectory)\n") if(!(-d($indexDirectory)));
-    die("invalid fasta directory ($fastaDirectory)\n") if(!(-d($fastaDirectory)));
-    die("invalid restriction fragment file ($restrictionFragmentFile)\n") if(!(-e($restrictionFragmentFile)));
+    confess "invalid genome directory ($indexDirectory)\n" if(!(-d($indexDirectory)));
+    confess "invalid fasta directory ($fastaDirectory)\n" if(!(-d($fastaDirectory)));
+    confess "invalid restriction fragment file ($restrictionFragmentFile)\n" if(!(-e($restrictionFragmentFile)));
     
     return($indexDirectory,$fastaDirectory,$restrictionFragmentFile);
 }
@@ -404,6 +399,7 @@ sub help() {
     printf STDERR ("\t%-10s %-10s %-10s\n", "-v", "[]", "FLAG, verbose mode");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--log", "[]", "log directory");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--email", "[]", "user email address");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "-s", "[]", "splitSize, # reads per chunk");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-h", "[]", "FLAG, hic flag ");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-f", "[]", "FLAG, 5C flag");
@@ -442,14 +438,17 @@ intro();
 my $cwd = getcwd();
 my $fullScriptPath=abs_path($0);
 my @fullScriptPathArr=split(/\//,$fullScriptPath);
-@fullScriptPathArr=@fullScriptPathArr[0..@fullScriptPathArr-3];
-my $scriptPath=join("/",@fullScriptPathArr);
+my @scriptDir=@fullScriptPathArr[0..@fullScriptPathArr-3];
+my $scriptPath=join("/",@scriptDir);
+my @gitDir=@fullScriptPathArr[0..@fullScriptPathArr-5];
+my $gitPath=join("/",@gitDir);
 
 my $configFileVariables={};
 my $userHomeDirectory = getUserHomeDirectory();
 my $cMapping = $scriptPath;
 
 $configFileVariables=logConfigVariable($configFileVariables,"cMapping",$cMapping);
+$configFileVariables=logConfigVariable($configFileVariables,"gitDir",$gitPath);
 $configFileVariables=logConfigVariable($configFileVariables,"keepSAM",$keepSAM);
 $configFileVariables=logConfigVariable($configFileVariables,"splitSize",$splitSize);
 $configFileVariables=logConfigVariable($configFileVariables,"hicModeFlag",$hicModeFlag);
@@ -549,7 +548,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     $outputFolder = $userHomeDirectory."/".$outputFolder if($outputFolder !~ /^\//);
     
     system("mkdir -p $outputFolder") if(!(-d $outputFolder));
-    die("warning - cannot use specified outputFolder ($outputFolder)\n") if(!(-d $outputFolder));
+    confess "warning - cannot use specified outputFolder ($outputFolder)\n" if(!(-d $outputFolder));
     print "\t\t\t$outputFolder\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"outputFolder",$outputFolder);
     
@@ -564,7 +563,7 @@ for(my $i=0;$i<$nLanes;$i++) {
         print "\t\taligner (bowtie2,novoalign) [$aligner]: ";
         my $userAligner = <STDIN>;
         chomp($userAligner);
-        die("invalid aligner ($userAligner)!") if(($userAligner ne "") and (($userAligner ne "bowtie2") and ($userAligner ne "novoalign")));
+        confess "invalid aligner ($userAligner)!" if(($userAligner ne "") and (($userAligner ne "bowtie2") and ($userAligner ne "novoalign")));
         $aligner = $userAligner if($userAligner ne "");
     } else {  # SNP mode or 5C mode
         $aligner="novoalign";
@@ -572,7 +571,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     print "\t\t\t$aligner\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"aligner",$aligner);
     
-    my $alignmentSoftwarePath=which($aligner);
+    my $alignmentSoftwarePath=which($aligner,0);
     # alignment software path choice
     $alignmentSoftwarePath=$alignmentSoftware->{ $aligner } if(exists($alignmentSoftware->{ $aligner }));
     print "\t\talignerPath [$alignmentSoftwarePath]: ";
@@ -580,7 +579,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     chomp($userAlignmentSoftwarePath);
     $alignmentSoftwarePath=$userAlignmentSoftwarePath if($userAlignmentSoftwarePath ne "");
     
-    die("aligner path does not exist! {$alignmentSoftwarePath}\n") if(!(-e($alignmentSoftwarePath)));
+    confess "invalid path for $aligner" if(!(-e($alignmentSoftwarePath)));
     print "\t\t\t$alignmentSoftwarePath\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"alignmentSoftwarePath",$alignmentSoftwarePath);
         
@@ -642,7 +641,7 @@ for(my $i=0;$i<$nLanes;$i++) {
         my $userEnzyme = <STDIN>;
         chomp($userEnzyme);
         $enzyme=$userEnzyme if($userEnzyme ne "");
-        die("Invalid Restriction Enzyme! ($enzyme)\n") if(!(exists($restrictionEnzymeSequences->{ $enzyme })));
+        confess "invalid restriction enzyme! ($enzyme)\n" if(!(exists($restrictionEnzymeSequences->{ $enzyme })));
         $restrictionSite=$restrictionEnzymeSequences->{ $enzyme };
         print "\t\t\t$enzyme / $restrictionSite\n";
     } else {
@@ -660,10 +659,10 @@ for(my $i=0;$i<$nLanes;$i++) {
     if(($hicModeFlag == 1) and ($fiveCModeFlag == 0) and ($snpModeFlag == 0)) { #HiC data
         
         $iterativeMappingFlag=1;
-        print "\t\titerative mapping mode? [on] (on|off): ";
+        print "\t\titerative mapping mode? [yes] (yes|no): ";
         my $userIterativeMappingFlag = <STDIN>;
         chomp($userIterativeMappingFlag);        
-        $iterativeMappingFlag = 0 if($userIterativeMappingFlag eq "off");
+        $iterativeMappingFlag = 0 if($userIterativeMappingFlag eq "no");
         print "\t\t\t".translateFlag($iterativeMappingFlag)."\n";
         
         # default iterative mapping options - if off (use full length read)
@@ -719,7 +718,8 @@ for(my $i=0;$i<$nLanes;$i++) {
         } else {
             print "\n";
         }
-        die("invalid restriction fragment file path!\n") if(!(-e($restrictionFragmentPath)));
+        
+        confess "invalid restriction fragment file path!\n" if(!(-e($restrictionFragmentPath)));
         print "\t\t\t$restrictionFragmentPath\n";
     }
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"restrictionFragmentPath",$restrictionFragmentPath);
@@ -728,7 +728,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $genomeDir=$genomeDirectory."/".$aligner."/".$genomeName;
     if(($hicModeFlag == 1) and ($fiveCModeFlag == 0)) {
         $genomePath .= "/".$genomeName;
-        die("invalid genome path! (".$genomePath."*)\n") if( (!(glob($genomePath))) and (!(glob($genomePath."*"))) );
+        confess "invalid genome path! (".$genomePath."*)\n" if( (!(glob($genomePath))) and (!(glob($genomePath."*"))) );
     }
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"genomeName",$genomeName);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"genomePath",$genomePath);
@@ -801,7 +801,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $cType="unknown";
     $cType="Hi-C" if($hicModeFlag == 1);
     $cType="5C" if($fiveCModeFlag == 1);
-    die("invalid cType! ($cType)\n") if($cType eq "null");
+    confess "invalid cType! ($cType)\n" if($cType eq "null");
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"cType",$cType);
     
     # calculate map time needed for LSF - assume split size is # lines not # reads (4 lines per read)

@@ -295,7 +295,6 @@ sub findDataFiles($$$$$$) {
             $correctedLaneName = $mappingData->{$flowCell."/".$laneName} if(exists($mappingData->{$flowCell."/".$laneName}));
             $correctedLaneName =~ s/\.//g;
             
-            
             push(@{$laneData->{$correctedLaneName}->{$fileType}},$file);
 
         }
@@ -478,20 +477,33 @@ intro();
 my $cwd = getcwd();
 my $fullScriptPath=abs_path($0);
 my @fullScriptPathArr=split(/\//,$fullScriptPath);
-@fullScriptPathArr=@fullScriptPathArr[0..@fullScriptPathArr-3];
-my $scriptPath=join("/",@fullScriptPathArr);
+my @scriptDir=@fullScriptPathArr[0..@fullScriptPathArr-3];
+my $scriptPath=join("/",@scriptDir);
+my @gitDir=@fullScriptPathArr[0..@fullScriptPathArr-5];
+my $gitPath=join("/",@gitDir);
 
 my $configFileVariables={};
 my $userHomeDirectory = getUserHomeDirectory();
 my $cMapping = $scriptPath;
 
+# log environment information
 $configFileVariables=logConfigVariable($configFileVariables,"cDataDirectory",$cDataDirectory);
 $configFileVariables=logConfigVariable($configFileVariables,"genomeName",$genomeName);
 $configFileVariables=logConfigVariable($configFileVariables,"cMapping",$cMapping);
+$configFileVariables=logConfigVariable($configFileVariables,"gitDir",$gitPath);
 $configFileVariables=logConfigVariable($configFileVariables,"customBinSize",$customBinSize);
 $configFileVariables=logConfigVariable($configFileVariables,"debugModeFlag",$debugModeFlag);
 $configFileVariables=logConfigVariable($configFileVariables,"maxdim",$maxdim);
 
+# check git repo dependencies
+my $hdf2tab_path=check_dependency($gitPath."/hdf2tab/scripts/hdf2tab.py","https://github.com/blajoie/hdf2tab");
+my $balance_path=check_dependency($gitPath."/balance/scripts/balance.py","https://github.com/blajoie/balance");
+my $tab2hdf_path=check_dependency($gitPath."/tab2hdf/scripts/tab2hdf.py","https://github.com/blajoie/tab2hdf");
+$configFileVariables=logConfigVariable($configFileVariables,"hdf2tab_path",$hdf2tab_path);
+$configFileVariables=logConfigVariable($configFileVariables,"tab2hdf_path",$tab2hdf_path);
+$configFileVariables=logConfigVariable($configFileVariables,"balance_path",$balance_path);
+
+# log compute resource
 my $computeResource = getComputeResource();
 $configFileVariables=logConfigVariable($configFileVariables,"computeResource",$computeResource);
 
@@ -505,10 +517,9 @@ $shortMode=1 if($debugModeFlag == 1);
 # setup queue/timelimit for LSF
 my $combineQueue="long";
 $combineQueue="short" if($shortMode == 1);
-my $combineTimeNeeded="120:00";
+my $combineTimeNeeded="36:00";
 $combineTimeNeeded="04:00" if($shortMode == 1);
 my $combineMemoryNeeded=8192;
-
 
 # enzyme choice 
 my $restrictionEnzymeSequences=getRestrictionEnzymeSequences();

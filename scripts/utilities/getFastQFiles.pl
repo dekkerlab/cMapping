@@ -173,10 +173,10 @@ sub findDataFiles($$$$$$$) {
 			if($hicMode == 1) {
 			
 				my @tmp2 = split(/__/,$fileName);
-                my $flowCell2=$tmp2[0];
-                my $laneName2=$tmp2[1];
-                my @tmp3=split(/\./,$tmp2[2]);
-                my $genome=$tmp3[0];
+				my $flowCell2=$tmp2[0];
+				my $laneName2=$tmp2[1];
+				my @tmp3=split(/\./,$tmp2[2]);
+				my $genome=$tmp3[0];
 
 				next if($genome ne $genomeName);
 				
@@ -188,7 +188,9 @@ sub findDataFiles($$$$$$$) {
 					exit;
 				}
 				
-				$correctedLaneName=(split(/_/,$laneName))[0];
+				$correctedLaneName=$laneName;
+				$correctedLaneName =~ s/^Sample_//;
+				$correctedLaneName=(split(/_/,$correctedLaneName))[0];
 				$correctedLaneName = (split(/\./,$correctedLaneName))[0];
 				$correctedLaneName = $mappingData->{$flowCell."/".$laneName} if(exists($mappingData->{$flowCell."/".$laneName}));
 				$correctedLaneName =~ s/\.//g;
@@ -219,7 +221,9 @@ sub findDataFiles($$$$$$$) {
 					exit;
 				}
 				
-				$correctedLaneName=(split(/_/,$laneName))[0];
+				$correctedLaneName=$laneName;
+				$correctedLaneName =~ s/^Sample_//;
+				$correctedLaneName=(split(/_/,$correctedLaneName))[0];
 				$correctedLaneName = (split(/\./,$correctedLaneName))[0];
 				$correctedLaneName = $mappingData->{$flowCell."/".$laneName} if(exists($mappingData->{$flowCell."/".$laneName}));
 				$correctedLaneName =~ s/\.//g;
@@ -234,7 +238,6 @@ sub findDataFiles($$$$$$$) {
 				
 			}
 			
-			#print "$correctedLaneName -> $file\n";
 			push(@{$laneData->{$correctedLaneName}},$file)
 
 		}
@@ -303,10 +306,10 @@ sub searchForFASTQ($$$$$$$) {
 				my $readLength = length($sampleLine);
 				$laneNum=(split(/_/,$dataFileName))[1];
 				
-                my $side="NA";
-                $side=1 if($dataFileName =~ /s_(.+)_1_sequence.txt/);
+				my $side="NA";
+				$side=1 if($dataFileName =~ /s_(.+)_1_sequence.txt/);
 				$side=2 if($dataFileName =~ /s_(.+)_2_sequence.txt/);
-                
+				
 				$fastqFiles->{$side}->{"path"}=$dataDirectory."/".$dataFileName if(($side == 1) or ($side == 2));
 				$fastqFiles->{$side}->{"readLength"}=$readLength if(($side == 1) or ($side == 2));
 				$fastqFiles->{"laneNum"}=$laneNum;
