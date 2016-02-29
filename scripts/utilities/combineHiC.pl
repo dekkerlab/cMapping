@@ -209,7 +209,7 @@ sub findMappingFiles($$$$) {
             &findMappingFiles($mappingData,$cDataDirectory,$file,$genomeName);
         } else {
             my $strippedFilePath = $file;
-            $strippedFilePath =~ s/$cDataDirectory//;
+            $strippedFilePath =~ s/$cDataDirectory\///;
             my $flowCell = (split(/\//,$strippedFilePath))[0];
             
             next if(($flowCell eq "LIVE") or ($flowCell eq "FREEZES"));
@@ -250,7 +250,7 @@ sub findDataFiles($$$$$$) {
             &findDataFiles($laneData,$mappingData,$cDataDirectory,$file,$genomeName,$restrictionFragmentPath);
         } else {
             my $strippedFilePath = $file;
-            $strippedFilePath =~ s/$cDataDirectory//;
+            $strippedFilePath =~ s/$cDataDirectory\///;
             my $flowCell = (split(/\//,$strippedFilePath))[0];
             my $laneName = (split(/\//,$strippedFilePath))[1];
             
@@ -272,7 +272,7 @@ sub findDataFiles($$$$$$) {
             
             if($flowCell."__".$laneName."__".$genome.".validPair.txt.gz" ne $fileName) {
                 print "\n";
-                print "error with file format...\n";
+                print "error with file format\n\t[$cDataDirectory]\n\t[$file]\n\t[$strippedFilePath]\n\t\tflowCell=$flowCell\n\t\tlaneName=$laneName\n\t\tgenome=$genome\n";
                 print "\t".$fileName."\n";
                 print "\t".$flowCell."__".$laneName."__".$genome.".validPair.txt.gz\n";
                 print "\n";

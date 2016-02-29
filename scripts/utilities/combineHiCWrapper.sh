@@ -128,8 +128,7 @@ then
 				sub_mapID=`uuidgen | rev | cut -d '-' -f 1`
 				chr_mapID=${mapID}__${sub_mapID}
 				
-				#echo "bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${chr_mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${intervalFile} ${chr_mapID}"
-				bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${chr_mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${intervalFile} ${chr_mapID}
+				bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${chr_mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${intervalFile} ${chr_mapID} &> /dev/null
 				results[${nResults}]=${jobName}__${group}__${binLabel}-${binSize}.complete
 				let nResults++
 			done
@@ -137,7 +136,7 @@ then
 			group="genome"
 			cp ${restrictionFragmentPath} ${jobDir}/map__${mapID}/${jobName}__${group}.txt
 			intervalFile=${jobDir}/map__${mapID}/${jobName}__${group}.txt
-			bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${restrictionFragmentPath} ${mapID}
+			bsub -n 1 -q $combineQueue -R rusage[mem=$combineMemoryNeeded:tmp=$tmpNeeded] -W $combineTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J combineHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/utilities/garbageCollectTmp.sh ${UUID} ${mapID} /home/bl73w/lsf_jobs" ${combineHiC} ${configFile} ${binSize} ${binLabel} ${group} ${restrictionFragmentPath} ${mapID} &> /dev/null
 			results[${nResults}]=${jobName}__${group}__${binLabel}-${binSize}.complete
 			let nResults++
 		fi

@@ -150,7 +150,7 @@ do
 	mapID=`uuidgen | rev | cut -d '-' -f 1`
 	let adjustedMapMemoryNeededMegabyte=($mapMemoryNeededMegabyte+$nTasks-1)/$nTasks; # adjust memory usage by nCPU requested
 	let adjustedMapMemoryNeededMegabyte=$adjustedMapMemoryNeededMegabyte+1024 # add 1024 of working memory per process
-	bsub -n ${nTasks} -q $mapQueue -m blades -R "span[hosts=1]" -R "rusage[mem=$adjustedMapMemoryNeededMegabyte:tmp=$mapScratchSize]" -W $mapTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J mapHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/scripts/garbageCollectTmp.sh ${UUID} ${mapID} /home/bl73w/lsf_jobs" ${map} ${configFile} ${chunkStart} ${chunkEnd} ${mapID}
+	bsub -n ${nTasks} -q $mapQueue -m blades -R "span[hosts=1]" -R "rusage[mem=$adjustedMapMemoryNeededMegabyte:tmp=$mapScratchSize]" -W $mapTimeNeeded -N -u bryan.lajoie\@umassmed.edu -J mapHiC -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err -Ep "${cMapping}/scripts/garbageCollectTmp.sh ${UUID} ${mapID} /home/bl73w/lsf_jobs" ${map} ${configFile} ${chunkStart} ${chunkEnd} ${mapID} &> /dev/null
 	
 	
 	sleep 5
@@ -233,19 +233,19 @@ cp ${mapReduceDir}/validPairs/${jobName}.pcrDupe.log ${mapReduceDir}/log/.
 
 # combine all chunk stats + calculate dangling-end molecule length histogram
 perl ${plotMoleculeSizeHistogram} -i ${mapReduceDir}/moleculeSize-log/ -jn ${mapReduceDir}/moleculeSize-log/${jobName}
-Rscript ${moleculeSizeHistogram} ${mapReduceDir}/moleculeSize-log/ ${jobName}.moleculeSize.plot.log
+Rscript ${moleculeSizeHistogram} ${mapReduceDir}/moleculeSize-log/ ${jobName}.moleculeSize.plot.log &> /dev/null
 cp ${mapReduceDir}/moleculeSize-log/${jobName}.moleculeSize.log ${mapReduceDir}/log/.
 cp ${mapReduceDir}/moleculeSize-log/${jobName}.moleculeSize.plot.log.png ${mapReduceDir}/plots/.
 
 # combine all chunk stats + calculate strand bias at nearby distance + cutoff to use
 distanceCutoff=`perl ${plotStrandBias} -i ${mapReduceDir}/strandBias-log/ -jn ${mapReduceDir}/strandBias-log/${jobName}`
-Rscript ${strandBiasPlot} ${mapReduceDir}/strandBias-log/ ${jobName}.strandBias.log ${distanceCutoff}
+Rscript ${strandBiasPlot} ${mapReduceDir}/strandBias-log/ ${jobName}.strandBias.log ${distanceCutoff} &> /dev/null
 cp ${mapReduceDir}/strandBias-log/${jobName}.strandBias.log ${mapReduceDir}/log/.
 cp ${mapReduceDir}/strandBias-log/${jobName}.strandBias.log.png ${mapReduceDir}/plots/.
 
 # combine all chunk stats + create mapping log pie charts
 perl ${aggregrateInteractionLog} -i ${mapReduceDir}/interaction-log/ -jn ${mapReduceDir}/interaction-log/${jobName}
-Rscript ${plotInteractionLog} ${mapReduceDir}/interaction-log/ ${jobName}.interaction.log
+Rscript ${plotInteractionLog} ${mapReduceDir}/interaction-log/ ${jobName}.interaction.log &> /dev/null
 cp ${mapReduceDir}/interaction-log/${jobName}.interaction.log ${mapReduceDir}/log/.
 cp ${mapReduceDir}/interaction-log/${jobName}.interaction.log.png ${mapReduceDir}/plots/.
 
@@ -255,7 +255,7 @@ cp ${mapReduceDir}/mapping-log/${jobName}.mapping.log ${mapReduceDir}/log/.
 
 # draw plots for iterative mapping
 cat ${mapReduceDir}/stats/iterativeMapping.header ${mapReduceDir}/stats/iterativeMapping.*.i*.stats > ${mapReduceDir}/stats/${jobName}.iterativeMapping.log
-Rscript ${drawIterativePlots} ${mapReduceDir}/stats/ ${jobName}.iterativeMapping.log ${iterativeMappingStart} ${iterativeMappingEnd} ${iterativeMappingStep}
+Rscript ${drawIterativePlots} ${mapReduceDir}/stats/ ${jobName}.iterativeMapping.log ${iterativeMappingStart} ${iterativeMappingEnd} ${iterativeMappingStep} &> /dev/null
 cp ${mapReduceDir}/stats/${jobName}.iterativeMapping.log ${mapReduceDir}/log/.
 cp ${mapReduceDir}/stats/${jobName}.iterativeMapping.log.png ${mapReduceDir}/plots/.
 
