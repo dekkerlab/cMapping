@@ -174,7 +174,7 @@ sub storeMapping($$$) {
     while($line = <MAPPING>) {
         chomp($line);
         
-        next if($line eq "");
+        next if($line eq "");        
         
         my ($origLaneName,$newLaneName)=split(/\t/,$line);
         
@@ -182,7 +182,6 @@ sub storeMapping($$$) {
         $nRenamed++;
         
         $mappingData->{$laneKey}=$newLaneName;
-        #print "\t$laneKey -> $newLaneName\n";
         
     }
     close(MAPPING);

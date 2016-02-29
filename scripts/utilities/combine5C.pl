@@ -21,9 +21,9 @@ sub check_options {
 
     my ($cDataDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
     
-     if( defined($opts->{ cDataDirectoryectory }) ) {
-        $cDataDirectory = $opts->{ cDataDirectoryectory };
-        croak "cDataDirectoryectory [".$cDataDirectory."] does not exist" if(!(-d $cDataDirectory));
+     if( defined($opts->{ cDataDirectory }) ) {
+        $cDataDirectory = $opts->{ cDataDirectory };
+        croak "cDataDirectory [".$cDataDirectory."] does not exist" if(!(-d $cDataDirectory));
     } else {
         print STDERR "\nERROR: Option inputCDataDirectory|i is required.\n";
         help();
@@ -97,7 +97,7 @@ sub check_options {
         $shortMode=0;
     }
     
-    $ret->{ cDataDirectoryectory }=$cDataDirectory;
+    $ret->{ cDataDirectory }=$cDataDirectory;
     $ret->{ outputDirectory }=$outputDirectory;
     $ret->{ genomeDirectory }=$genomeDirectory;
     $ret->{ logDirectory }=$logDirectory;
@@ -386,7 +386,7 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'cDataDirectoryectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short');
+my $results = GetOptions( \%options,'cDataDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short');
 my ($cDataDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode)=check_options( \%options );
 
 intro();
@@ -404,7 +404,7 @@ my $userHomeDirectory = getUserHomeDirectory();
 my $cMapping = $scriptPath;
 
 
-$configFileVariables=logConfigVariable($configFileVariables,"cDataDirectoryectory",$cDataDirectory);
+$configFileVariables=logConfigVariable($configFileVariables,"cDataDirectory",$cDataDirectory);
 $configFileVariables=logConfigVariable($configFileVariables,"genomeName",$genomeName);
 $configFileVariables=logConfigVariable($configFileVariables,"cMapping",$cMapping);
 $configFileVariables=logConfigVariable($configFileVariables,"gitDir",$gitPath);
