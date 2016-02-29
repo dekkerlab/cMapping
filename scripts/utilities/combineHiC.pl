@@ -1,7 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Getopt::Long qw( :config posix_default bundling no_ignore_case );
+use Getopt::Long qw( :config posix_default no_ignore_case );
 use Carp qw(carp cluck croak confess);
 use POSIX qw(ceil floor strftime);
 use List::Util qw[min max];
@@ -672,7 +672,6 @@ foreach my $sampleName ( keys %$laneData ) {
     
     print "\n";
     
-    my $logDirectory=$userHomeDirectory."/cshare/cWorld-logs";
     print "\tlogDirectory [$logDirectory]: ";
     my $userLogDirectory = <STDIN>;
     chomp($userLogDirectory);
