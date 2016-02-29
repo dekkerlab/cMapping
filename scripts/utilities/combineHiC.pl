@@ -437,6 +437,7 @@ sub help() {
     printf STDERR ("\t%-10s %-10s %-10s\n", "-i", "[]", "cData directory(path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-o", "[]", "output directory (path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--gdir", "[]", "genome directory (fasta,index,restrictionSite)");
+	printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
     
     print STDERR "\n";
     
@@ -444,7 +445,6 @@ sub help() {
     printf STDERR ("\t%-10s %-10s %-10s\n", "-v", "[]", "FLAG, verbose mode");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--log", "[]", "log directory");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--email", "[]", "user email address");
-    printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-d", "[]", "FLAg, debugMode - keep all files for debug purposes");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--short", "[]", "FLAG, use the short queue");
     
