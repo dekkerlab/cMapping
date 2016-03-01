@@ -1,7 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Getopt::Long qw( :config posix_default no_ignore_case );
+use Getopt::Long qw( :config posix_default bundling no_ignore_case ); 
 use Carp qw(carp cluck croak confess);
 use POSIX qw(ceil floor strftime);
 use List::Util qw[min max];
@@ -154,10 +154,8 @@ sub getDefaultOutputFolder($) {
     
     my $userHomeDirectory = getUserHomeDirectory();
     
-    $outputFolder=$userHomeDirectory."/scratch/" if($outputFolder eq "");
+    $outputFolder=$userHomeDirectory."/scratch/hicData" if($outputFolder eq "");
     croak "scratch dir [".$outputFolder."] does not exist" if(!(-d $outputFolder));
-    
-    $outputFolder .= "/hicData/";
     
     return($outputFolder);
 }
@@ -469,7 +467,7 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'cDataDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short');
+my $results = GetOptions( \%options,'cDataDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short') or croak help();
 my ($cDataDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode)=check_options( \%options );
 
 intro();
@@ -538,7 +536,6 @@ $configFileVariables=logConfigVariable($configFileVariables,"enzyme",$enzyme);
 $configFileVariables=logConfigVariable($configFileVariables,"restrictionSite",$restrictionSite);
 
 my ($fastaPath,$restrictionFragmentPath)=getGenomePath($genomeDirectory,$genomeName,$restrictionSite);
-print "\t$fastaPath\n";
 $configFileVariables=logConfigVariable($configFileVariables,"fastaPath",$fastaPath);
 
 print "\nrestrictionFragmentPath [$restrictionFragmentPath]: ";

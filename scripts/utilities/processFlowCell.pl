@@ -430,7 +430,7 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'flowCellDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|s=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d');
+my $results = GetOptions( \%options,'flowCellDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|s=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d') or croak help();
 my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag)=check_options( \%options );
 
 intro();
