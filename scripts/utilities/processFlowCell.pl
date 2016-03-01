@@ -517,7 +517,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     print "\t\treduceScratchDir [$reduceScratchDir]\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"reduceScratchDir",$reduceScratchDir);
     
-    print "\t\tmapScratchDir [$mapScratchDir] :\t";
+    print "\t\tmapScratchDir [$mapScratchDir]:\t";
     my $userScratchDir = <STDIN>;
     chomp($userScratchDir);
     $mapScratchDir = $userScratchDir if($userScratchDir ne "");
@@ -540,7 +540,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     
     # process the output directory
     my ($outputFolder)=getDefaultOutputFolder($flowCellName,$laneName,$outputDirectory);
-    print "\t\toutputFolder [$outputFolder] :\t";
+    print "\t\toutputFolder [$outputFolder]:\t";
     my $userOutputFolder = <STDIN>;
     chomp($userOutputFolder);
     $outputFolder = $userOutputFolder if($userOutputFolder ne "");
@@ -600,7 +600,8 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $userOptionalSide1AlignmentOptions = <STDIN>;
     chomp($userOptionalSide1AlignmentOptions);
     $optionalSide1AlignmentOptions=$userOptionalSide1AlignmentOptions if($userOptionalSide1AlignmentOptions ne "");
-    print "\t\t\t$optionalSide1AlignmentOptions\n";
+    print "\t\t\t$optionalSide1AlignmentOptions\n" if($optionalSide1AlignmentOptions ne "");
+    print "\t\t\t[none]\n" if($optionalSide1AlignmentOptions eq "");
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"optionalSide1AlignmentOptions",$optionalSide1AlignmentOptions);
     
     # alignment options choice
@@ -609,12 +610,13 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $userOptionalSide2AlignmentOptions = <STDIN>;
     chomp($userOptionalSide2AlignmentOptions);
     $optionalSide2AlignmentOptions=$userOptionalSide2AlignmentOptions if($userOptionalSide2AlignmentOptions ne "");
-    print "\t\t\t$optionalSide2AlignmentOptions\n";
+    print "\t\t\t$optionalSide2AlignmentOptions\n" if($optionalSide2AlignmentOptions ne "");
+    print "\t\t\t[none]\n" if($optionalSide2AlignmentOptions eq "");
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"optionalSide2AlignmentOptions",$optionalSide2AlignmentOptions);
     
     my $minimumReadDistance=5;
     if(($aligner eq "novoalign") and ($snpModeFlag == 1)) {
-        print "\t\tminimumReadDistance [5] : ";
+        print "\t\tminimumReadDistance [5]: ";
         my $userMinimumReadDistance = <STDIN>;
         chomp($userMinimumReadDistance);
         $minimumReadDistance = $userMinimumReadDistance if($userMinimumReadDistance ne "");
@@ -623,7 +625,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     }
     
     if($snpModeFlag == 1) {
-        print "\t\tassumeCisAllele [on] : ";
+        print "\t\tassumeCisAllele [on]: ";
         my $userAssumeCisAllele = <STDIN>;
         chomp($userAssumeCisAllele);
         $assumeCisAllele=0 if(($userAssumeCisAllele ne "on") and ($userAssumeCisAllele ne "") and ($userAssumeCisAllele != 1));
@@ -637,7 +639,7 @@ for(my $i=0;$i<$nLanes;$i++) {
 
     my $restrictionSite="NA";
     if($hicModeFlag == 1) {
-        print "\t\tenzyme (".$enzymeString.") [".$enzyme."] : ";
+        print "\t\tenzyme (".$enzymeString.") [".$enzyme."]: ";
         my $userEnzyme = <STDIN>;
         chomp($userEnzyme);
         $enzyme=$userEnzyme if($userEnzyme ne "");
@@ -655,6 +657,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $iterativeMappingStart=$readLength;
     my $iterativeMappingEnd=$readLength;
     my $iterativeMappingStep=5;
+    my $iterativeMappingIterations=0;
     
     if(($hicModeFlag == 1) and ($fiveCModeFlag == 0) and ($snpModeFlag == 0)) { #HiC data
         
@@ -668,29 +671,31 @@ for(my $i=0;$i<$nLanes;$i++) {
         # default iterative mapping options - if off (use full length read)
     
         if($iterativeMappingFlag == 1) {
-            print "\t\t\titerativeMappingStart [25] : ";
+            print "\t\t\titerativeMappingStart [25]: ";
             $iterativeMappingStart = <STDIN>;
             chomp($iterativeMappingStart);
             $iterativeMappingStart = 25 if($iterativeMappingStart eq "");
         
-            print "\t\t\titerativeMappingEnd [$readLength] : ";
+            print "\t\t\titerativeMappingEnd [$readLength]: ";
             $iterativeMappingEnd = <STDIN>;
             chomp($iterativeMappingEnd);
             $iterativeMappingEnd = $readLength if(($iterativeMappingEnd eq "") or ($iterativeMappingEnd < $iterativeMappingStart) or ($iterativeMappingEnd > $readLength));
         
-            print "\t\t\titerativeMappingStep [5] : ";
+            print "\t\t\titerativeMappingStep [5]: ";
             $iterativeMappingStep = <STDIN>;
             chomp($iterativeMappingStep);
             $iterativeMappingStep = 5 if(($iterativeMappingStep eq "") or ($iterativeMappingStep < 2));
             
-            print "\t\t\t\titerativeMapping $iterativeMappingStart - $iterativeMappingEnd [$iterativeMappingStep]\n";
+            $iterativeMappingIterations = (($iterativeMappingEnd-$iterativeMappingStart)/$iterativeMappingStep);
+            print "\t\t\t\titerativeMapping $iterativeMappingStart - $iterativeMappingEnd [$iterativeMappingStep] [$iterativeMappingIterations]\n";
         }
-
     }
+    
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"iterativeMappingFlag",$iterativeMappingFlag);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"iterativeMappingStart",$iterativeMappingStart);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"iterativeMappingEnd",$iterativeMappingEnd);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"iterativeMappingStep",$iterativeMappingStep);
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"iterativeMappingIterations",$iterativeMappingIterations);
     
     # genomeName choice
     print "\t\tgenome [".$genomeName."]: ";
@@ -698,8 +703,8 @@ for(my $i=0;$i<$nLanes;$i++) {
     chomp($genome);
     
     $genomeName = $genome if($genome ne "");
-    
     print "\n\tMust select a genome! ($genome | $genomeName) - skipping lane...\n\n" if($genomeName eq "");
+    print "\t\t\t$genomeName\n";
     
     my $indexPath="NA";
     my $fastaPath="NA";
@@ -708,19 +713,15 @@ for(my $i=0;$i<$nLanes;$i++) {
     if($hicModeFlag == 1) {
         ($indexPath,$fastaPath,$restrictionFragmentPath)=getGenomePath($genomeDirectory,$aligner,$genomeName,$restrictionSite);
         $restrictionFragmentPath="" if($snpModeFlag == 1);
-        print "\t\t\t$fastaPath\n";
-        print "\t\trestrictionFragmentPath [$restrictionFragmentPath]: ";
         if($snpModeFlag == 1) {
+            print "\n\t\trestrictionFragmentPath [$restrictionFragmentPath]: ";
             my $userRestrictionFragmentPath = <STDIN>;
             chomp($userRestrictionFragmentPath);
             $userRestrictionFragmentPath = "" if(!(-e($userRestrictionFragmentPath)));
             $restrictionFragmentPath = $userRestrictionFragmentPath if($userRestrictionFragmentPath ne "");
-        } else {
-            print "\n";
         }
         
         confess "invalid restriction fragment file path!\n" if(!(-e($restrictionFragmentPath)));
-        print "\t\t\t$restrictionFragmentPath\n";
     }
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"restrictionFragmentPath",$restrictionFragmentPath);
     
@@ -734,35 +735,6 @@ for(my $i=0;$i<$nLanes;$i++) {
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"genomePath",$genomePath);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"genomeDir",$genomeDir);
     
-    my $indexSize=`du -b $genomeDir`;
-    chomp($indexSize);
-    $indexSize=(split(/\t/,$indexSize))[0];
-    # add 8GB to each, to account for working memory per tile size (8)
-    my $indexSizeMegabyte = 8198+(ceil(($indexSize*1.25) / 1000000)); # scale index size by 1.25 fold
-    my $splitSizeMegabyte = 8192+(ceil(((500*($splitSize/4))/1000)/1000)); # assume 500 bytes per line of side1+side2 SAM
-    
-    my $intervalSizeMegabyte=0;
-    if($hicModeFlag == 1) {
-        my $intervalSize=`du -b $restrictionFragmentPath`;
-        chomp($intervalSize);
-        $intervalSize=(split(/\t/,$intervalSize))[0];
-        $intervalSizeMegabyte = (ceil(($intervalSize*1.25) / 1000000)); # scale interval size by 1.25 fold
-    }
-    my $mapMemoryNeededMegabyte=max($indexSizeMegabyte,$splitSizeMegabyte,$intervalSizeMegabyte);
-    my $reduceMemoryNeededMegabyte=max(($splitSizeMegabyte*2),$intervalSizeMegabyte);
-    
-    print "\t\t\t\t indexSizeMegabyte (".$indexSizeMegabyte."M) memory...\n";
-    print "\t\t\t\t splitSizeMegabyte (".$splitSizeMegabyte."M) memory...\n";
-    print "\t\t\t\t intervalSizeMegabyte (".$intervalSizeMegabyte."M) memory...\n";
-    print "\t\t\t\t reduceMemoryNeededMegabyte (".$reduceMemoryNeededMegabyte."M) memory...\n";
-    print "\t\t\t\t mapMemoryNeededMegabyte (".$mapMemoryNeededMegabyte."M) memory...\n";
-    
-    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"indexSizeMegabyte",$indexSizeMegabyte);
-    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"splitSizeMegabyte",$splitSizeMegabyte);
-    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"intervalSizeMegabyte",$intervalSizeMegabyte);
-    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"reduceMemoryNeededMegabyte",$reduceMemoryNeededMegabyte);
-    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"mapMemoryNeededMegabyte",$mapMemoryNeededMegabyte);
-    
     print "\t\tuserEmail (email address) [$userEmail]:\t";
     my $userEmailChoice = <STDIN>;
     chomp($userEmailChoice);
@@ -774,18 +746,8 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $emailTo = <STDIN>;
     chomp($emailTo);
     $emailTo = "none" if(($emailTo eq "") or ($emailTo !~ /@/) or ($emailTo =~ /\s+/));
-    print "\t\t\t$emailTo\n";
+    print "\t\t\t[$emailTo]\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"emailTo",$emailTo);
-    
-    print "\t\tlogDirectory [$logDirectory]: ";
-    my $userLogDirectory = <STDIN>;
-    chomp($userLogDirectory);
-    $userLogDirectory =~ s/\/$//;
-    $logDirectory=$userLogDirectory if(-d($userLogDirectory));
-    print "\t\t\t$logDirectory\n";
-    system("mkdir -p $logDirectory") if(!(-d $logDirectory));
-    croak "invalid log directory [$logDirectory]\n" if(!(-d($logDirectory)));
-    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"logDirectory",$logDirectory);
     
     my $UUID=getUniqueString();
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"UUID",$UUID);
@@ -804,8 +766,39 @@ for(my $i=0;$i<$nLanes;$i++) {
     confess "invalid cType! ($cType)\n" if($cType eq "null");
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"cType",$cType);
     
+    # calculate compute resources
+    my $indexSize=`du -b $genomeDir`;
+    chomp($indexSize);
+    $indexSize=(split(/\t/,$indexSize))[0];
+    # add 8GB to each, to account for working memory per tile size (8)
+    my $indexSizeMegabyte = 8198+(ceil(($indexSize*1.25) / 1000000)); # scale index size by 1.25 fold
+    my $splitSizeMegabyte = 8192+(ceil(((500*($splitSize/4))/1000)/1000)); # assume 500 bytes per line of side1+side2 SAM
+    
+    my $intervalSizeMegabyte=0;
+    if($hicModeFlag == 1) {
+        my $intervalSize=`du -b $restrictionFragmentPath`;
+        chomp($intervalSize);
+        $intervalSize=(split(/\t/,$intervalSize))[0];
+        $intervalSizeMegabyte = (ceil(($intervalSize*1.25) / 1000000)); # scale interval size by 1.25 fold
+    }
+    my $mapMemoryNeededMegabyte=max($indexSizeMegabyte,$splitSizeMegabyte,$intervalSizeMegabyte);
+    my $reduceMemoryNeededMegabyte=max(($splitSizeMegabyte*2),$intervalSizeMegabyte);
+    
+    print "\t\tcompute resources:\n";
+    print "\t\t\tindexSizeMegabyte (".$indexSizeMegabyte."M) memory...\n";
+    print "\t\t\tsplitSizeMegabyte (".$splitSizeMegabyte."M) memory...\n";
+    print "\t\t\tintervalSizeMegabyte (".$intervalSizeMegabyte."M) memory...\n";
+    print "\t\t\treduceMemoryNeededMegabyte (".$reduceMemoryNeededMegabyte."M) memory...\n";
+    print "\t\t\tmapMemoryNeededMegabyte (".$mapMemoryNeededMegabyte."M) memory...\n";
+    
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"indexSizeMegabyte",$indexSizeMegabyte);
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"splitSizeMegabyte",$splitSizeMegabyte);
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"intervalSizeMegabyte",$intervalSizeMegabyte);
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"reduceMemoryNeededMegabyte",$reduceMemoryNeededMegabyte);
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"mapMemoryNeededMegabyte",$mapMemoryNeededMegabyte);
+    
     # calculate map time needed for LSF - assume split size is # lines not # reads (4 lines per read)
-    my $mapTimeNeeded=((0.00004*$splitSize)-9.345);
+    my $mapTimeNeeded=((0.00004*$splitSize)-9.345)+240;
     $mapTimeNeeded=((0.0003*$splitSize)+57)+720 if($snpModeFlag == 1);
     # this linear approximation is done using mm9 - bowtie (excel)
     
@@ -813,7 +806,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $genomeSizeFactor=max(1,($indexSizeMegabyte/3000));
     $genomeSizeFactor = log($genomeSizeFactor) if($genomeSizeFactor > 1);
     $mapTimeNeeded *= $genomeSizeFactor;
-    $mapTimeNeeded *= 2 if($iterativeMappingFlag == 1);
+    $mapTimeNeeded *= 2*($iterativeMappingIterations/10) if($iterativeMappingFlag == 1);
     $mapTimeNeeded = 120 if($shortMode == 1);
     
     my $mapTimeNeededHour = max(2,floor($mapTimeNeeded/60));
@@ -825,8 +818,19 @@ for(my $i=0;$i<$nLanes;$i++) {
     $mapTimeNeeded=$mapTimeNeededHour.":".$mapTimeNeededMinute;
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"mapTimeNeeded",$mapTimeNeeded);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"mapQueue",$mapQueue);
-    print "\t\treduceResources\t$reduceQueue\t$reduceTimeNeeded\n";
-    print "\t\tmapResources\t$mapQueue\t$mapTimeNeeded\n";
+    print "\t\t\treduceResources\t$reduceQueue\t$reduceTimeNeeded\n";
+    print "\t\t\tmapResources\t$mapQueue\t$mapTimeNeeded [".2*($iterativeMappingIterations/10)."]\n";
+    
+    # get log directory
+    print "\t\tlogDirectory [$logDirectory]: ";
+    my $userLogDirectory = <STDIN>;
+    chomp($userLogDirectory);
+    $userLogDirectory =~ s/\/$//;
+    $logDirectory=$userLogDirectory if(-d($userLogDirectory));
+    print "\t\t\t$logDirectory\n";
+    system("mkdir -p $logDirectory") if(!(-d $logDirectory));
+    croak "invalid log directory [$logDirectory]\n" if(!(-d($logDirectory)));
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"logDirectory",$logDirectory);
     
     printConfigFile($configFileVariables,$tmpConfigFileVariables,$configFilePath);
         
