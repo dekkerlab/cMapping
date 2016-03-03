@@ -12,21 +12,30 @@ use Cwd;
 use cworld::dekker;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.0";
+my $version = "1.0.1";
 
 sub check_options {
     my $opts = shift;
 
     my $ret={};
 
-    my ($cDataDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
+    my ($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
     
-     if( defined($opts->{ cDataDirectory }) ) {
+    if( defined($opts->{ cDataDirectory }) ) {
         $cDataDirectory = $opts->{ cDataDirectory };
         $cDataDirectory =~ s/\/$//;
         croak "cDataDirectory [".$cDataDirectory."] does not exist" if(!(-d $cDataDirectory));
     } else {
         print STDERR "\nERROR: Option inputCDataDirectory|i is required.\n";
+        help();
+    }
+    
+    if( defined($opts->{ scratchDirectory }) ) {
+        $scratchDirectory = $opts->{ scratchDirectory };
+        $scratchDirectory =~ s/\/$//;
+        croak "scratchDirectory [".$scratchDirectory."] does not exist" if(!(-d $scratchDirectory));
+    } else {
+        print STDERR "\nERROR: Option scratchDirectory|s is required.\n";
         help();
     }
     
@@ -99,6 +108,7 @@ sub check_options {
     }
     
     $ret->{ cDataDirectory }=$cDataDirectory;
+    $ret->{ scratchDirectory }=$scratchDirectory;
     $ret->{ outputDirectory }=$outputDirectory;
     $ret->{ genomeDirectory }=$genomeDirectory;
     $ret->{ logDirectory }=$logDirectory;
@@ -110,7 +120,7 @@ sub check_options {
     $ret->{ debugModeFlag }=$debugModeFlag;
     $ret->{ shortMode }=$shortMode;
 
-    return($cDataDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
+    return($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
 }
 
 sub readConfigFile($) {
@@ -432,6 +442,7 @@ sub help() {
     
     print STDERR "Required:\n";
     printf STDERR ("\t%-10s %-10s %-10s\n", "-i", "[]", "cData directory(path)");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "-s", "[]", "scratch directory (path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-o", "[]", "output directory (path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--gdir", "[]", "genome directory (fasta,index,restrictionSite)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
@@ -467,8 +478,8 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'cDataDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short') or croak help();
-my ($cDataDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode)=check_options( \%options );
+my $results = GetOptions( \%options,'cDataDirectory|i=s','scratchDirectory|s=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short') or croak help();
+my ($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode)=check_options( \%options );
 
 intro();
 
@@ -506,9 +517,9 @@ my $computeResource = getComputeResource();
 $configFileVariables=logConfigVariable($configFileVariables,"computeResource",$computeResource);
 
 # setup scratch space
-my $reduceScratchDir=$userHomeDirectory."/scratch";
+my $reduceScratchDir=$scratchDirectory;
 my $mapScratchDir="/tmp";
-$mapScratchDir=$userHomeDirectory."/scratch" if($debugModeFlag == 1);
+$mapScratchDir=$scratchDirectory if($debugModeFlag == 1);
 
 $shortMode=1 if($debugModeFlag == 1);
 

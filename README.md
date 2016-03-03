@@ -34,6 +34,10 @@ https://github.com/blajoie/hdf2tab
 https://github.com/blajoie/tab2hdf
 https://github.com/blajoie/balance
 
+cMapping also requires a 'genome' directory containing FASTA, Bowtie2 Indices and a 'restrictionFragment' for each genome/enzyme combination.
+A pre-comupted genome directory can be downloaded here:
+https://www.dropbox.com/s/1if5hctt7n5b0xl/genome.tar.gz?dl=0
+
 ## Communication
 
 - [Bryan Lajoie](https://github.com/blajoie)

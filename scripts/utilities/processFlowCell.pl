@@ -12,20 +12,29 @@ use Cwd;
 use cworld::dekker;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.1";
+my $version = "1.0.2";
 
 sub check_options {
     my $opts = shift;
     
     my $ret={};
     
-    my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
+    my ($flowCellDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
     
     if( defined($opts->{ flowCellDirectory }) ) {
         $flowCellDirectory = $opts->{ flowCellDirectory };
         croak "flowCellDirectory [".$flowCellDirectory."] does not exist" if(!(-d $flowCellDirectory));
     } else {
         print STDERR "\nERROR: Option inputFlowCellDirectory|i is required.\n";
+        help();
+    }
+    
+    if( defined($opts->{ scratchDirectory }) ) {
+        $scratchDirectory = $opts->{ scratchDirectory };
+        $scratchDirectory =~ s/\/$//;
+        croak "scratchDirectory [".$scratchDirectory."] does not exist" if(!(-d $scratchDirectory));
+    } else {
+        print STDERR "\nERROR: Option scratchDirectory|s is required.\n";
         help();
     }
     
@@ -132,6 +141,7 @@ sub check_options {
     croak "\nERROR: cannot use SNP mode with -f option\n" if(($snpModeFlag+$fiveCModeFlag >= 2) );
     
     $ret->{ flowCellDirectory }=$flowCellDirectory;
+    $ret->{ scratchDirectory }=$scratchDirectory;
     $ret->{ outputDirectory }=$outputDirectory;
     $ret->{ genomeDirectory }=$genomeDirectory;
     $ret->{ logDirectory }=$logDirectory;
@@ -148,7 +158,7 @@ sub check_options {
     $ret->{ snpModeFlag }=$snpModeFlag;
     $ret->{ debugModeFlag }=$debugModeFlag;
     
-    return($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
+    return($flowCellDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag);
 }
 
 sub getAlignmentSoftware() {
@@ -195,10 +205,10 @@ sub getDefaultOutputFolder($$$) {
     
     my $userHomeDirectory = getUserHomeDirectory();
     
-    $outputFolder=$userHomeDirectory."/scratch/" if($outputFolder eq "");
+    $outputFolder=$userHomeDirectory."/scratch/cData" if($outputFolder eq "");
     croak "scratch dir [".$outputFolder."] does not exist" if(!(-d $outputFolder));
     
-    $outputFolder .= "/cData/$flowCell/$laneName";
+    $outputFolder .= "/$flowCell/$laneName";
     
     return($outputFolder);
 }
@@ -390,6 +400,7 @@ sub help() {
     
     print STDERR "Required:\n";
     printf STDERR ("\t%-10s %-10s %-10s\n", "-i", "[]", "flow cell directory (path)");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "-s", "[]", "scratch directory (path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-o", "[]", "output directory (path)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--gdir", "[]", "genome directory (fasta,index,restrictionSite)");
     
@@ -399,7 +410,7 @@ sub help() {
     printf STDERR ("\t%-10s %-10s %-10s\n", "-v", "[]", "FLAG, verbose mode");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--log", "[]", "log directory");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--email", "[]", "user email address");
-    printf STDERR ("\t%-10s %-10s %-10s\n", "-s", "[]", "splitSize, # reads per chunk");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "--split", "[]", "splitSize, # reads per chunk");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-h", "[]", "FLAG, hic flag ");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-f", "[]", "FLAG, 5C flag");
@@ -430,8 +441,8 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'flowCellDirectory|i=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|s=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d') or croak help();
-my ($flowCellDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag)=check_options( \%options );
+my $results = GetOptions( \%options,'flowCellDirectory|i=s','scratchDirectory|s=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','hicModeFlag|h','verbose|v','genomeName|g=s','fiveCModeFlag|f','keepSAM|ks','assumeCisAllele|aca','enzyme|e=s','splitSize|split=i','shortMode|short','snpModeFlag|sm','debugModeFlag|d') or croak help();
+my ($flowCellDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$verbose,$genomeName,$hicModeFlag,$fiveCModeFlag,$keepSAM,$assumeCisAllele,$enzyme,$splitSize,$shortMode,$snpModeFlag,$debugModeFlag)=check_options( \%options );
 
 intro();
 
@@ -457,9 +468,9 @@ $configFileVariables=logConfigVariable($configFileVariables,"fiveCModeFlag",$fiv
 $configFileVariables=logConfigVariable($configFileVariables,"debugModeFlag",$debugModeFlag);
 
 # setup scratch space
-my $reduceScratchDir=$userHomeDirectory."/scratch";
+my $reduceScratchDir=$scratchDirectory;
 my $mapScratchDir="/tmp";
-$mapScratchDir=$userHomeDirectory."/scratch" if($debugModeFlag == 1);
+$mapScratchDir=$scratchDirectory if($debugModeFlag == 1);
 
 # setup queue/timelimit for LSF
 my $reduceQueue="long";
