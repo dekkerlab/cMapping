@@ -29,7 +29,6 @@ for req in $(cat requirements.txt); do pip install $req; done
 cMapping also requires the following git repos
 
 https://github.com/blajoie/cMapping
-https://github.com/blajoie/cworld-dekker
 https://github.com/blajoie/hdf2tab
 https://github.com/blajoie/tab2hdf
 https://github.com/blajoie/balance

@@ -9,10 +9,8 @@ use List::Util qw[min max];
 use Cwd 'abs_path';
 use Cwd;
 
-use cworld::dekker;
-
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.1";
+my $version = "1.0.3";
 
 sub check_options {
     my $opts = shift;
@@ -122,6 +120,110 @@ sub check_options {
 
     return($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
 }
+
+
+sub getRestrictionEnzymeSequences() {
+    my %restrictionEnzymeSequences=();
+    
+    $restrictionEnzymeSequences{ HindIII } = "AAGCTT";
+    $restrictionEnzymeSequences{ EcoRI } = "GAATTC";
+    $restrictionEnzymeSequences{ NcoI } = "CCATGG";
+    $restrictionEnzymeSequences{ DpnII } = "GATC";
+    $restrictionEnzymeSequences{ MNase } = "MNase";
+    
+    return(\%restrictionEnzymeSequences);
+}
+
+sub getUserEmail() {
+    
+    # hb67w:x:10839:1081:Houda Belaghzal [Houda.belaghzal@umassmed.edu]:/home/hb67w:/bin/bash
+    my $user_info=`grep \$USER /etc/passwd`;
+    chomp($user_info);
+    
+    my @tmp=split(/:/,$user_info);
+    my $user_email=$tmp[4];
+    $user_email=(split(/\[/,$user_email))[1];
+    $user_email =~ s/\]//;
+    
+    $user_email = "" if($user_email !~ /\@/);
+    
+    return($user_email);
+}
+
+sub getUserHomeDirectory() {
+    my $userHomeDirectory = `echo \$HOME`;
+    chomp($userHomeDirectory);
+    return($userHomeDirectory);
+}
+
+sub getUniqueString() {
+    my $UUID = `uuidgen`;
+    chomp($UUID);
+    return($UUID);
+}
+
+sub getSmallUniqueString() {
+    my $UUID=`uuidgen | rev | cut -d '-' -f 1`;
+    chomp($UUID);
+    return($UUID);
+}
+
+sub getComputeResource() {
+    my $hostname = `hostname`;
+    chomp($hostname);
+    return($hostname);
+}
+
+sub translateFlag($) {
+    my $flag=shift;
+    
+    my $response="no";
+    $response="yes" if($flag);    
+    return($response);
+}
+
+sub check_dependency($;$) {
+    # required
+    my $command=shift;
+    # optional
+    my $weblink=shift;
+    
+    my $repo=(split(/\//,$command))[-3];
+    
+    confess "missing dependency [$repo] - $command.\n\tPlease install\n\t$weblink\n\n" if(!-e($command));
+    
+    return($command);
+    
+}
+
+sub which($;$) {
+    # required
+    my $command=shift;
+    # optional
+    my $die=1;
+    $die=shift if @_;
+    
+    my $path="";
+    $path=`which $command 2>&1`;
+    chomp($path);
+    
+    confess "no path for $command" if(($path =~ /which: no/) and ($die == 1));
+        
+    return($path);
+}
+
+sub getDate() {
+    my $time = strftime '%I:%M:%S %P, %m/%d/%Y', localtime;
+    
+    return($time);
+}
+
+sub commify {
+   (my $num = shift) =~ s/\G(\d{1,3})(?=(?:\d\d\d)+(?:\.|$))/$1,/g; 
+   return $num; 
+}
+
+#
 
 sub readConfigFile($) {
     my $configFile=shift;
@@ -265,7 +367,6 @@ sub findDataFiles($$$$$$) {
             
             my @tmp = split(/\//,$strippedFilePath);
             my $fileName = $tmp[@tmp-1];
-
             
             next if($fileName !~ /.validPair.txt.gz$/);
             
@@ -293,8 +394,8 @@ sub findDataFiles($$$$$$) {
             my $log=readConfigFile($configFilePath);
             my $configRestrictionFragmentPath="NA";
             $configRestrictionFragmentPath=$log->{ restrictionFragmentPath };
-            
-            next if($restrictionFragmentPath ne $configRestrictionFragmentPath);
+                        
+            next if( (split(/\//,$restrictionFragmentPath))[-1] ne (split(/\//,$configRestrictionFragmentPath))[-1] );
             
             my $correctedLaneName=$laneName;
             $correctedLaneName =~ s/^Sample_//;
