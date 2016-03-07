@@ -539,6 +539,7 @@ sub help() {
     printf STDERR ("\t%-10s %-10s %-10s\n", "--email", "[]", "user email address");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--split", "[]", "splitSize, # reads per chunk");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-g", "[]", "genomeName, genome to align");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "-e", "[]", "enzyme name (DpnII, HindIII etc.)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-h", "[]", "FLAG, hic flag ");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-f", "[]", "FLAG, 5C flag");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-d", "[]", "FLAg, debugMode - keep all files for debug purposes");

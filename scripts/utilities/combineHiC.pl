@@ -17,7 +17,7 @@ sub check_options {
 
     my $ret={};
 
-    my ($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
+    my ($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode,$enzyme);
     
     if( defined($opts->{ cDataDirectory }) ) {
         $cDataDirectory = $opts->{ cDataDirectory };
@@ -104,6 +104,12 @@ sub check_options {
     } else {
         $shortMode=0;
     }
+
+    if( defined($opts->{ enzyme }) ) {
+        $enzyme = $opts->{ enzyme };
+    } else {
+        $enzyme = "HindIII";
+    }
     
     $ret->{ cDataDirectory }=$cDataDirectory;
     $ret->{ scratchDirectory }=$scratchDirectory;
@@ -117,8 +123,9 @@ sub check_options {
     $ret->{ experimentPrefix }=$experimentPrefix;
     $ret->{ debugModeFlag }=$debugModeFlag;
     $ret->{ shortMode }=$shortMode;
-
-    return($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode);
+    $ret->{ enzyme }=$enzyme;
+   
+    return($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode,$enzyme);
 }
 
 
@@ -552,6 +559,7 @@ sub help() {
     
     print STDERR "Options:\n";
     printf STDERR ("\t%-10s %-10s %-10s\n", "-v", "[]", "FLAG, verbose mode");
+    printf STDERR ("\t%-10s %-10s %-10s\n", "-e", "[]", "enzyme name (DpnII, HindIII etc.)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--log", "[]", "log directory");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--email", "[]", "user email address");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-d", "[]", "FLAg, debugMode - keep all files for debug purposes");
@@ -579,8 +587,8 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'cDataDirectory|i=s','scratchDirectory|s=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short') or croak help();
-my ($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode)=check_options( \%options );
+my $results = GetOptions( \%options,'cDataDirectory|i=s','scratchDirectory|s=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short','enzyme|e=s') or croak help();
+my ($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode,$enzyme)=check_options( \%options );
 
 intro();
 
@@ -632,11 +640,9 @@ $combineTimeNeeded="04:00" if($shortMode == 1);
 my $combineMemoryNeeded=8192;
 
 # enzyme choice 
+my $restrictionSite="";
 my $restrictionEnzymeSequences=getRestrictionEnzymeSequences();
 my $enzymeString=join(',', (keys %{$restrictionEnzymeSequences}));
-
-my ($enzyme,$restrictionSite);
-$enzyme="HindIII";
 print "enzyme (".$enzymeString.") [".$enzyme."] : ";
 my $userEnzyme = <STDIN>;
 chomp($userEnzyme);
