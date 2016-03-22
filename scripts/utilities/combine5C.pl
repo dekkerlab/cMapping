@@ -10,7 +10,7 @@ use Cwd 'abs_path';
 use Cwd;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.3";
+my $version = "1.0.4";
 
 sub check_options {
     my $opts = shift;

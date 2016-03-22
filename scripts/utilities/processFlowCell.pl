@@ -10,7 +10,7 @@ use Cwd 'abs_path';
 use Cwd;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.3";
+my $version = "1.0.4";
 
 sub check_options {
     my $opts = shift;
@@ -873,6 +873,8 @@ for(my $i=0;$i<$nLanes;$i++) {
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"genomeName",$genomeName);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"genomePath",$genomePath);
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"genomeDir",$genomeDir);
+    
+    $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"userHomeDirectory",$userHomeDirectory);
     
     print "\t\tuserEmail (email address) [$userEmail]:\t";
     my $userEmailChoice = <STDIN>;
