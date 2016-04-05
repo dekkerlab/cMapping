@@ -150,7 +150,7 @@ do
 	mapID=`uuidgen | rev | cut -d '-' -f 1`
 	let adjustedMapMemoryNeededMegabyte=($mapMemoryNeededMegabyte+$nTasks-1)/$nTasks; # adjust memory usage by nCPU requested
 	let adjustedMapMemoryNeededMegabyte=$adjustedMapMemoryNeededMegabyte+1024 # add 1024 of working memory per process
-	bsub -n ${nTasks} -q $mapQueue -m blades -R "span[hosts=1]" -R "rusage[mem=$adjustedMapMemoryNeededMegabyte:tmp=$mapScratchSize]" -W $mapTimeNeeded -N -u $userEmail -J mapHiC -o $userHomeDirectory/lsf_jobs/LSB_%J.log -e $userHomeDirectory/lsf_jobs/LSB_%J.err -Ep "${cMapping}/scripts/garbageCollectTmp.sh ${UUID} ${mapID} /home/bl73w/lsf_jobs" ${map} ${configFile} ${chunkStart} ${chunkEnd} ${mapID} &> /dev/null
+	bsub -n ${nTasks} -q $mapQueue -m blades -R "span[hosts=1]" -R "rusage[mem=$adjustedMapMemoryNeededMegabyte:tmp=$mapScratchSize]" -W $mapTimeNeeded -N -u $userEmail -J mapHiC -o $userHomeDirectory/lsf_jobs/LSB_%J.log -e $userHomeDirectory/lsf_jobs/LSB_%J.err -Ep "${cMapping}/scripts/garbageCollectTmp.sh ${UUID} ${mapID} $userHomeDirectory/lsf_jobs" ${map} ${configFile} ${chunkStart} ${chunkEnd} ${mapID} &> /dev/null
 	
 	
 	sleep 5

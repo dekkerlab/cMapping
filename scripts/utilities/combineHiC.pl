@@ -10,7 +10,7 @@ use Cwd 'abs_path';
 use Cwd;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.4";
+my $version = "1.0.5";
 
 sub check_options {
     my $opts = shift;
@@ -606,6 +606,8 @@ my $cMapping = $scriptPath;
 
 # log environment information
 $configFileVariables=logConfigVariable($configFileVariables,"cDataDirectory",$cDataDirectory);
+$configFileVariables=logConfigVariable($configFileVariables,"userHomeDirectory",$userHomeDirectory);
+$configFileVariables=logConfigVariable($configFileVariables,"userEmail",$userEmail);
 $configFileVariables=logConfigVariable($configFileVariables,"genomeName",$genomeName);
 $configFileVariables=logConfigVariable($configFileVariables,"cMapping",$cMapping);
 $configFileVariables=logConfigVariable($configFileVariables,"gitDir",$gitPath);

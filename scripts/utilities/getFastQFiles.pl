@@ -69,6 +69,12 @@ sub check_options {
     return($cDataDirectory,$readDir,$outputDir,$genomeName,$projectName,$hicMode,$fiveCMode,$experimentPrefix);
 }
 
+sub getUserHomeDirectory() {
+    my $userHomeDirectory = `echo \$HOME`;
+    chomp($userHomeDirectory);
+    return($userHomeDirectory);
+}
+
 sub storeMapping($$$) {
     my $mappingData={};
     $mappingData=shift;
@@ -470,7 +476,9 @@ foreach my $sampleName ( keys %$laneData ) {
         
         close(OUT);
         system("chmod 755 $tmpShell");
-        
-        system("bsub -q short -W 04:00 -N -u bryan.lajoie\@umassmed.edu -o /home/bl73w/lsf_jobs/LSB_%J.log -e /home/bl73w/lsf_jobs/LSB_%J.err $tmpShell 2> /dev/null");
+    
+        my $userEmail=getUserEmail();
+        my $userHomeDirectory = getUserHomeDirectory();
+        system("bsub -q short -W 04:00  -J getFastqFiles  -N -u $userEmail -o $userHomeDirectory/lsf_jobs/LSB_%J.log -e $userHomeDirectory/lsf_jobs/LSB_%J.err $tmpShell 2> /dev/null");
     }
 }

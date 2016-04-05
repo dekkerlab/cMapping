@@ -10,7 +10,7 @@ use Cwd 'abs_path';
 use Cwd;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.4";
+my $version = "1.0.5";
 
 sub check_options {
     my $opts = shift;
@@ -667,9 +667,9 @@ for(my $i=0;$i<$nLanes;$i++) {
     # assume 1 byte per ASCII.
     # 40 chars per header line
     # readLength chars per SEQ/QV line
-    my $mapScratchSize = (((40*2)+($readLength*2))*($splitSize/4));
+    my $mapScratchSize = (((80*2)+($readLength*2))*($splitSize/4));
     $mapScratchSize = ceil((($mapScratchSize)/1024)/1024);
-    $mapScratchSize = ($mapScratchSize * 10); #assume 10 fold input data of max /tmp usage
+    $mapScratchSize = ($mapScratchSize * 30); #assume 10 fold input data of max /tmp usage
     print "\t\t\t".$mapScratchSize."M\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"mapScratchSize",$mapScratchSize);
     
