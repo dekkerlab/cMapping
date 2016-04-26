@@ -10,7 +10,7 @@ use Cwd 'abs_path';
 use Cwd;
 
 my $tool=(split(/\//,abs_path($0)))[-1];
-my $version = "1.0.5";
+my $version = "1.0.6";
 
 sub check_options {
     my $opts = shift;
@@ -764,11 +764,11 @@ for(my $i=0;$i<$nLanes;$i++) {
     }
     
     if($snpModeFlag == 1) {
-        print "\t\tassumeCisAllele [on]: ";
+        print "\t\tassumeCisAllele [".translateFlag($assumeCisAllele)."]: ";
         my $userAssumeCisAllele = <STDIN>;
         chomp($userAssumeCisAllele);
         $assumeCisAllele=0 if(($userAssumeCisAllele ne "on") and ($userAssumeCisAllele ne "") and ($userAssumeCisAllele != 1));
-        print "\t\t\t$assumeCisAllele\n";
+        print "\t\t\t".translateFlag($assumeCisAllele)."\n";
     }
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"assumeCisAllele",$assumeCisAllele);
     
@@ -853,10 +853,11 @@ for(my $i=0;$i<$nLanes;$i++) {
         ($indexPath,$fastaPath,$restrictionFragmentPath)=getGenomePath($genomeDirectory,$aligner,$genomeName,$restrictionSite);
         $restrictionFragmentPath="" if($snpModeFlag == 1);
         if($snpModeFlag == 1) {
-            print "\n\t\trestrictionFragmentPath [$restrictionFragmentPath]: ";
+            print "\t\trestrictionFragmentPath [$restrictionFragmentPath]: ";
             my $userRestrictionFragmentPath = <STDIN>;
             chomp($userRestrictionFragmentPath);
             $userRestrictionFragmentPath = "" if(!(-e($userRestrictionFragmentPath)));
+            print "\t\t\t$userRestrictionFragmentPath\n";
             $restrictionFragmentPath = $userRestrictionFragmentPath if($userRestrictionFragmentPath ne "");
         }
         
@@ -887,7 +888,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $emailTo = <STDIN>;
     chomp($emailTo);
     $emailTo = "none" if(($emailTo eq "") or ($emailTo !~ /@/) or ($emailTo =~ /\s+/));
-    print "\t\t\t[$emailTo]\n";
+    print "\t\t\t$emailTo\n";
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"emailTo",$emailTo);
     
     my $UUID=getUniqueString();
@@ -895,6 +896,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     my $jobName=$flowCellName."__".$laneName."__".$genomeName;
     $tmpConfigFileVariables=logConfigVariable($tmpConfigFileVariables,"jobName",$jobName);
     
+    print "\t\tconfigFile\n";
     my $configFilePath=$logDirectory."/".$UUID.".cWorld-stage1.cfg";
     print "\t\t\t$configFilePath\n";
     
@@ -940,7 +942,7 @@ for(my $i=0;$i<$nLanes;$i++) {
     
     # calculate map time needed for LSF - assume split size is # lines not # reads (4 lines per read)
     my $mapTimeNeeded=((0.00004*$splitSize)-9.345)+240;
-    $mapTimeNeeded=((0.0003*$splitSize)+57)+720 if($snpModeFlag == 1);
+    $mapTimeNeeded=(((0.0003*$splitSize)+57)+720)*2 if($snpModeFlag == 1);
     # this linear approximation is done using mm9 - bowtie (excel)
     
     $shortMode = 1 if($debugModeFlag);
