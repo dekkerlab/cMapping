@@ -49,19 +49,19 @@ https://www.dropbox.com/s/1if5hctt7n5b0xl/genome.tar.gz?dl=0
 
 ## Usage
 
-```
-?
 
-$ python scripts/hdf2tab.py  --help
+```
+$ perl ~/git/cMapping/scripts/utilities/processFlowCell.pl 
 
 Tool:           processFlowCell.pl
-Version:        1.0.1
+Version:        1.0.6
 Summary:        cMapping pipeline - stage 1
 
 Usage: perl processFlowCell.pl [OPTIONS] -i <inputFlowCellDirectory> -o <outputDirectory> --gdir <genomeDirectory>
 
 Required:
         -i         []         flow cell directory (path)
+        -s         []         scratch directory (path)
         -o         []         output directory (path)
         --gdir     []         genome directory (fasta,index,restrictionSite)
 
@@ -69,8 +69,9 @@ Options:
         -v         []         FLAG, verbose mode
         --log      []         log directory
         --email    []         user email address
-        -s         []         splitSize, # reads per chunk
+        --split    []         splitSize, # reads per chunk
         -g         []         genomeName, genome to align
+        -e         []         enzyme name (DpnII, HindIII etc.)
         -h         []         FLAG, hic flag 
         -f         []         FLAG, 5C flag
         -d         []         FLAg, debugMode - keep all files for debug purposes
@@ -87,7 +88,75 @@ Contact:
     https://github.com/blajoie/cMapping
     https://github.com/blajoie/cWorld-dekker
     http://my5C.umassmed.edu
-   
+```
+
+```
+$ perl ~/git/cMapping/scripts/utilities/combineHiC.pl 
+
+Tool:           combineHiC.pl
+Version:        1.0.6
+Summary:        cMapping pipeline - stage 2 [Hi-C]
+
+Usage: perl combineHiC.pl [OPTIONS] -i <inputCDataDirectory> -o <outputDirectory> --gdir <genomeDirectory>
+
+Required:
+        -i         []         cData directory(path)
+        -s         []         scratch directory (path)
+        -o         []         output directory (path)
+        --gdir     []         genome directory (fasta,index,restrictionSite)
+        -g         []         genomeName, genome to align
+
+Options:
+        -v         []         FLAG, verbose mode
+        -e         []         enzyme name (DpnII, HindIII etc.)
+        --log      []         log directory
+        --email    []         user email address
+        -d         []         FLAg, debugMode - keep all files for debug purposes
+        --short    []         FLAG, use the short queue
+
+Notes:
+    Stage 2 of the cMapping pipeline, for processing 5C/Hi-C data [UMMS specific].
+
+Contact:
+    Bryan R. Lajoie
+    Dekker Lab 2016
+    https://github.com/blajoie/cMapping
+    https://github.com/blajoie/cWorld-dekker
+    http://my5C.umassmed.edu
+```
+
+```
+$ perl ~/git/cMapping/scripts/utilities/combine5C.pl 
+
+Tool:           combine5C.pl
+Version:        1.0.6
+Summary:        cMapping pipeline - stage 2 [5C]
+
+Usage: perl combine5C.pl [OPTIONS] -i <inputCDataDirectory> -o <outputDirectory> --gdir <genomeDirectory>
+
+Required:
+        -i         []         flow cell directory (path)
+        -s         []         scratch directory (path)
+        -o         []         output directory (path)
+        --gdir     []         genome directory (fasta,index,restrictionSite)
+
+Options:
+        -v         []         FLAG, verbose mode
+        --log      []         log directory
+        --email    []         user email address
+        -g         []         genomeName, genome to align
+        -d         []         FLAg, debugMode - keep all files for debug purposes
+        --short    []         FLAG, use the short queue
+
+Notes:
+    Stage 2 of the cMapping pipeline, for processing 5C/Hi-C data [UMMS specific].
+
+Contact:
+    Bryan R. Lajoie
+    Dekker Lab 2016
+    https://github.com/blajoie/cMapping
+    https://github.com/blajoie/cWorld-dekker
+    http://my5C.umassmed.edu   
 ```
   
 ## Usage Examples
@@ -95,7 +164,7 @@ Contact:
 
 ```
 
-perl ~/git/cMapping/scripts/utilities/processFlowCell.pl -i ~/farline/HPCC/cshare/solexa/08MAY20_PE50_SAMPLEDATA/ --gdir ~/genome/ -o ~/farline/HPCC/cshare/ --log ~/cshare/cWorld-logs/ -g dm3 -h 
+perl ~/git/cMapping/scripts/utilities/processFlowCell.pl -i ~/farline/HPCC/cshare/solexa/08MAY20_PE50_SAMPLEDATA/ --gdir ~/genome/ -o ~/farline/HPCC/cshare/ --log ~/cshare/cWorld-logs/ -s ~/scratch -g dm3 -h 
 
 ```
 

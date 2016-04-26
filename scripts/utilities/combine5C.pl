@@ -516,7 +516,7 @@ my $userHomeDirectory = getUserHomeDirectory();
 my $cMapping = $scriptPath;
 
 $configFileVariables=logConfigVariable($configFileVariables,"cDataDirectory",$cDataDirectory);
-$configFileVariables=logConfigVariable($tmpConfigFileVariables,"userHomeDirectory",$userHomeDirectory);
+$configFileVariables=logConfigVariable($configFileVariables,"userHomeDirectory",$userHomeDirectory);
 $configFileVariables=logConfigVariable($configFileVariables,"userEmail",$userEmail);
 $configFileVariables=logConfigVariable($configFileVariables,"genomeName",$genomeName);
 $configFileVariables=logConfigVariable($configFileVariables,"cMapping",$cMapping);
