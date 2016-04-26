@@ -50,6 +50,7 @@ https://www.dropbox.com/s/1if5hctt7n5b0xl/genome.tar.gz?dl=0
 ## Usage
 
 
+### processFlowCell
 ```
 $ perl ~/git/cMapping/scripts/utilities/processFlowCell.pl 
 
@@ -90,6 +91,7 @@ Contact:
     http://my5C.umassmed.edu
 ```
 
+### combineHiC
 ```
 $ perl ~/git/cMapping/scripts/utilities/combineHiC.pl 
 
@@ -125,6 +127,7 @@ Contact:
     http://my5C.umassmed.edu
 ```
 
+### combine5C
 ```
 $ perl ~/git/cMapping/scripts/utilities/combine5C.pl 
 
