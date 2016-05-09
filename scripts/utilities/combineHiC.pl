@@ -558,6 +558,7 @@ sub help() {
     print STDERR "\n";
     
     print STDERR "Options:\n";
+    printf STDERR ("\t%-10s %-10s %-10s\n", "--binsize", "[10000000,2500000,1000000,500000,250000,100000,40000]", "custom bin sizes to use (comma seperated bp)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-v", "[]", "FLAG, verbose mode");
     printf STDERR ("\t%-10s %-10s %-10s\n", "-e", "[]", "enzyme name (DpnII, HindIII etc.)");
     printf STDERR ("\t%-10s %-10s %-10s\n", "--log", "[]", "log directory");
@@ -587,7 +588,7 @@ sub help() {
 }
 
 my %options;
-my $results = GetOptions( \%options,'cDataDirectory|i=s','scratchDirectory|s=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|C=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short','enzyme|e=s') or croak help();
+my $results = GetOptions( \%options,'cDataDirectory|i=s','scratchDirectory|s=s','outputDirectory|o=s','genomeDirectory|gdir=s','logDirectory|log=s','userEmail|email=s','genomeName|g=s','maxdim|m=s','customBinSize|binsize=s','experimentPrefix|ep=s','debugModeFlag|d','shortMode|short','enzyme|e=s') or croak help();
 my ($cDataDirectory,$scratchDirectory,$outputDirectory,$genomeDirectory,$logDirectory,$userEmail,$genomeName,$customBinSize,$maxdim,$experimentPrefix,$debugModeFlag,$shortMode,$enzyme)=check_options( \%options );
 
 intro();
