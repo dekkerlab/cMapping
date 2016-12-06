@@ -306,7 +306,10 @@ sub findMappingFiles($$$$) {
     my $cDataDirectory=shift;
     my $parentDir=shift;
     my $genomeName=shift;
-    
+   
+    # HAKAN fix
+    my $flowCell = (split(/\//,$cDataDirectory))[-1];
+    # 
     $parentDir .= "/" if($parentDir !~ /\/$/);
     
     opendir(my $dir, $parentDir) || die "can't opendir $parentDir: $!";
@@ -320,8 +323,11 @@ sub findMappingFiles($$$$) {
         } else {
             my $strippedFilePath = $file;
             $strippedFilePath =~ s/$cDataDirectory//;
-            my $flowCell = (split(/\//,$strippedFilePath))[0];
             
+            # HAKAN fix
+            #my $flowCell = (split(/\//,$strippedFilePath))[0];
+            #
+
             next if(($flowCell eq "LIVE") or ($flowCell eq "FREEZES"));
             
             my $laneName = (split(/\//,$strippedFilePath))[1];
@@ -360,7 +366,11 @@ sub findDataFiles($$$$$) {
         } else {
             my $strippedFilePath = $file;
             $strippedFilePath =~ s/$cDataDirectory//;
-            my $flowCell = (split(/\//,$strippedFilePath))[0];
+            
+            #HAKAN fix
+            my $flowCell = (split(/\//,$cDataDirectory))[-1];
+            #
+
             my $laneName = (split(/\//,$strippedFilePath))[1];
             
             next if($laneName eq "mapping");
